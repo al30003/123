@@ -1,0 +1,492 @@
+==================================    SQLite 3.3.2 ======
+--select * 
+--from tracks
+--where Unitprice > 1 and Unitprice < 2 
+-------------------------------------------
+
+-------------------------------------------
+--select Name, UnitPrice*0.8 as price_no_tax
+--from tracks
+--------------------------------------------
+--select FirstName || ' ' || LastName as FIO,
+--       ifnull(Fax, '000-000-000') as Fax
+-- from customers
+--------------------------------------------
+--select Name, Composer, Milliseconds*0.000016 as Time
+--from tracks
+--where Composer = 'AC/DC' and (unitPrice < 1 or Time < 1.5)
+--------------------------------------------
+SELECT salesDate,
+       date(salesDate, 'start of year'),
+       date(salesDate, 'start of month'),
+       date(salesDate, 'start of day') 
+  FROM sales
+ WHERE date(salesDate, 'start of year') = date(2011 - 1 - 1);
+
+
+select *, 
+       strftime('%Y', HireDate) - strftime('%Y', BirthDate)
+from employees;
+
+
+SELECT distinct 
+country, City
+  FROM customers
+--where fax is not null
+ order by country asc, City desc;
+
+select LastName, 
+       max(strftime('%Y', HireDate) - strftime('%Y', BirthDate))
+  from employees;
+
+select country, city, count (*), avg(age), min(age), max(age), sum(age)
+from customers
+group by country, city
+order by country limit 10;
+
+--  Прожажи по годам: 
+SELECT date(salesDate, 'start of year'),
+       count( * ) Продажа
+  FROM sales
+ GROUP BY date(salesDate, 'start of year');
+
+SELECT FirstName || ' ' || LastName AS FIO
+  FROM customers
+ WHERE FirstName LIKE '%ch%';
+
+SELECT Name,
+       Bytes * 0.000001 AS Size
+  FROM tracks;
+
+SELECT FirstName || ' ' || LastName AS FIO, City, HireDate
+  FROM employees
+ WHERE City = 'Calgary' and HireDate>= date('2002-01-01') and HireDate < date('2003-01-01')
+ 
+SELECT FirstName || ' ' || LastName AS FIO
+  FROM employees
+ WHERE (HireDate - BirthDate) >= 40;
+
+select *
+from customers
+where Country = 'USA' and Fax is NULL
+
+SELECT *, strftime('%m', SalesDate)
+  FROM sales
+--WHERE ShipCountry = 'Canada' and (SalesDate between '2009-08-01 00:00:00' and '2009-09-01 00:00:00')
+WHERE ShipCountry = 'Canada' and strftime('%m', SalesDate) in ('08', '09')
+
+select Email
+from customers
+ WHERE Email LIKE '%gmail%'; 
+ 
+SELECT *
+  FROM employees
+ WHERE strftime('%Y', 'now') - strftime('%Y', HireDate)  >= 18;
+ 
+SELECT Title
+from employees
+order by Title asc 
+
+SELECT FirstName, LastName, Age
+from customers
+order by LastName asc
+
+select min (Milliseconds*0.001) as Time, Name, Composer
+from tracks
+
+SELECT Country,
+       avg(Age) 
+ GROUP BY Country;
+  FROM customers
+
+SELECT LastName
+from employees
+where strftime('%m', HireDate) in ('10')
+
+select LastName, max (strftime('%Y', HireDate) - strftime('%Y', BirthDate))
+from employees
+
+SELECT date(salesDate, 'start of year'),
+       count( * ) 
+  FROM sales
+ WHERE ShipCountry = 'USA'
+ 
+SELECT *
+  FROM sales
+WHERE strftime ('%Y', SalesDate) = '2012' and ShipCountry = 'USA'  
+
+-- Список композиторов с самым дорогим треком
+
+SELECT Composer, max(UnitPrice) as max_track
+  FROM tracks
+  group by Composer
+  order by max_track desc limit 5
+ 
+-- В какие немецкие города в 2009 году было > 1 кол-во продаж
+ 
+SELECT ShipCity, count(*)   -- count это подсчет кол-ва строчек 1 строчка = 1 продажа)
+  FROM sales AS s
+ WHERE SalesDate >= date('2009-01-01') AND 
+       SalesDate < date('2010-01-01') AND 
+       Shipcountry = 'Germany'
+ GROUP BY ShipCity
+HAVING count( * ) > 1; -- and ShipCity = 'Beerlin' --Фильтрация повепх группировки. То есть после group by
+
+--------------------------------------
+--------------------------------------
+
+SELECT MediaTypeId,
+       Name
+  FROM media_types;
+
+INSERT INTO media_types (MediaTypeId, Name)
+                       VALUES (7, 'WAV5'), (9, 'WAV11')
+
+SELECT *
+  FROM media_types
+  
+  update media_types set name = 'AAAA', MediaTypeId = MediaTypeId + 1
+  where MediaTypeId = 8
+  
+-----------------------------------------------
+  
+begin transaction
+
+delete
+from media_types
+where MediaTypeId in (25, 26)
+
+commit
+rollback
+ 
+----------------------------------------------- 
+
+INSERT INTO media_types (MediaTypeId, name)
+select GenreId, Name
+from genres
+where GenreId in (25, 26);
+
+select FirstName, LastName, 'Клиент' from customers
+union all    ---
+select FirstName, LastName, 'Сотрудник' from employees
+
+select *
+from
+(
+select FirstName from customers
+union
+select FirstName from employees
+) as t
+where....
+
+select City from employees
+except  --все имена работников кроме имен клиентов
+select City from customers
+
+select FirstName from employees
+intersect  -- имена работников, совпадающие с именами клиентов
+select FirstName from customers
+
+--Посчитать кол-во продаж для каждого клиента подзапросом
+--ПОля: Фамилия. Имя. Кол-во продаж
+
+select customerId, FirstName, LastName, (
+   select count (*)
+   from sales
+   where sales.CustomerId = customers.CustomerId
+) as AllSales
+from customers;
+
+--Сколько треков купил каждый клиент?
+
+SELECT CustomerId,
+       FirstName,
+       LastName,
+       (
+           SELECT sum(Quantity) 
+             FROM sales_items AS si
+            WHERE si.salesId IN (
+                      SELECT salesId
+                        FROM sales AS s
+                       WHERE s.CustomerId = c.CustomerId
+                  )
+       )
+       AS sales_all
+  FROM customers AS c
+ ORDER BY sales_all DESC;
+
+
+-----------------------------------------------------------
+
+--В какую страну было продано больше всего треков встиле джазз?
+
+select ShipCountry, (
+      select sum(Quantity)
+       from sales_items as si
+       where si.salesId = s.salesId
+       and si.TrackId in (
+         select TrackId from Tracks as t
+         where t.GenreId in ( 
+         Select GenreId
+           from genres
+           where name = 'Jazz'
+       )
+) 
+from sales as s
+order by ShipCountry;
+
+---------------------------------------------------------------
+-- Join --
+
+select ShipCountry, (
+      select sum(Quantity)
+       from sales_items as si
+       where si.salesId = s.salesId
+       and si.TrackId in (
+         select TrackId from Tracks as t
+         where t.GenreId in ( 
+         Select GenreId
+           from genres
+           where name = 'Jazz'
+       )
+) 
+from sales as s
+order by ShipCountry;
+
+----------------------------------------------------------------
+
+select *
+from artists inner join albums on artists.ArtistId = albums.ArtistId
+
+----------------------------------------------------------------
+
+-- Сгенерииь список жанров и треков сценой и отбросить треки дороже 2
+SELECT t.name AS TrackName,
+       g.name AS GenreName,
+       t.UnitPrice
+  FROM Tracks AS t
+       INNER JOIN
+       genres AS g ON g.genreId = t.genreId
+ WHERE t.UnitPrice > 2;
+
+---------------------------------------------------------------------
+-- Сколько покупок сделал каждый клиент в 2009 году
+select FirstName, LastName, (       -- Подзапрос
+                  select count (*)  -- Подсчет кол-ва покупок
+                   from sales
+                   where strftime('%Y', salesDate) = '2009' and sales.CustomerId = t.CustomerId  --Условия корреляции после AND
+       ) as count_sales
+from customers as t
+order by count_sales desc
+
+--- спомощью JOIN
+
+SELECT c.CustomerId,
+       c.FirstName,
+       c.lastName,
+       count( * ) AS count_sales
+  FROM customers AS c
+       INNER JOIN 
+       sales AS s ON s.CustomerId = c.CustomerId
+ WHERE strftime('%Y', SalesDate) = '2009'
+ GROUP BY c.CustomerId,
+          c.FirstName,
+          c.LastName
+ ORDER BY count_sales DESC;
+
+-----------------------------------------------
+delete from cats
+
+insert into cats
+select 1, 'Мурзик', 'Белый'
+union 
+select 1, 'Персик','Черный'
+
+------------------------------------------------
+-- Правильный вариант с LEFT JOIN:
+
+SELECT c.CustomerId,
+       c.FirstName,
+       c.lastName,
+       count( s.CustomerId ) AS count_sales
+  FROM customers AS c
+       LEFT JOIN
+       sales AS s ON s.CustomerId = c.CustomerId
+ AND strftime('%Y', SalesDate) = '2009'
+ GROUP BY c.CustomerId,
+          c.FirstName,
+          c.LastName
+ ORDER BY count_sales DESC;
+ 
+---------------------------------------------------
+--ДЗ второй день
+
+
+select ShipCountry, (
+      select sum(Quantity)
+       from sales_items as si 
+       where si.salesId = s.salesId 
+        and
+          SalesDate >= date('2012-01-01') AND 
+          SalesDate < date('2012-04-01')
+) as Sales_All
+from sales as s
+where ShipCountry = 'USA'
+
+------------------------------------------------------------------------------
+------------------------------------------------------------------------------
+
+SELECT ShipCountry,
+       count( * ) AS count_sales
+  FROM sales_items AS c
+       INNER JOIN
+       sales AS s ON s.SalesId = c.SalesId
+ 
+ GROUP BY ShipCountry;
+ WHERE strftime('%Y', SalesDate) = '2012'and strftime ('%m', salesDate) in (1,2,3) and ShipCountry = 'USA';
+
+select ShipCountry, 
+       (
+       select sum(Quantity)
+         from sales_items as si 
+        where si.salesId = s.salesId 
+          and strftime('%Y', salesDate) = '2012' --and strftime ('%m', salesDate) in (1,2,3) --and sales.CustomerId = t.CustomerId          
+       ) 
+       as Sales_All
+  from sales as s
+having ShipCountry = 'USA'
+ group by ShipCountry;
+
+
+SELECT ShipCountry,
+       (-- Подзапрос
+           SELECT count(*)-- Подсчет кол-ва покупок 
+             FROM sales
+            WHERE strftime('%Y', salesDate) = '2012' AND 
+                  sales.SaleId = t.SaleId AND 
+                  ShipCountry = 'USA'-- Условия корреляции после AND
+       )
+       AS count_sales
+  FROM sales_items AS t;
+
+
+SELECT *
+  FROM sales
+ WHERE ShipCountry = 'USA' AND 
+       SalesDate >= date('2012-01-01') AND 
+       SalesDate < date('2012-04-01');
+  
+          
+ ----    Список имен покупателей. которые не являются сотрудниками
+ 
+select FirstName from customers
+except
+select FirstName from employees
+
+------  Количество треков в каждом альбоме
+
+ 
+
+SELECT Title,
+       count
+  FROM artists
+       INNER JOIN
+       albums ON artists.ArtistId = albums.ArtistId;
+
+
+SELECT Title,
+       count(*) AS Tracks_All
+  FROM albums AS c
+       INNER JOIN
+       tracks AS s ON c.AlbumId = s.AlbumId 
+ ORDER BY count_sales DESC;
+
+--------  Покажите фамилию и имя покупателей немцев сделавших заказы в 2009 году, товары которых были отгружены в город Берлин?
+
+
+SELECT ShipCity, LastName, FirstName (
+  FROM sales AS s
+ WHERE SalesDate >= date('2009-01-01') AND 
+       SalesDate < date('2010-01-01')  AND 
+       Shipcountry = 'Germany'
+       )
+from customers
+GROUP BY ShipCity
+HAVING ShipCity = 'Berlin' 
+
+select FirstName, LastName, (       -- Подзапрос
+                    -- Подсчет кол-ва покупок
+                   from sales as s
+                   where strftime('%Y', salesDate) = '2009' and s.CustomerId = t.CustomerId and ShipCity = 'Berlin'  --Условия корреляции после AND
+       ) as City
+from customers as t....Address
+
+--------  Покажите фамилии  клиентов которые  купили больше 30 музыкальных треков ?
+
+SELECT FirstName,
+       LastName,
+       (
+           SELECT sum(Quantity) 
+             FROM sales_items AS si
+            WHERE si.salesId IN (
+                      SELECT salesId
+                        FROM sales AS s
+                       WHERE s.CustomerId = c.CustomerId
+                  )
+       )
+       AS sales_all
+  FROM customers AS c
+ WHERE sales_all > 30
+ ORDER BY sales_all DESC;
+ 
+----------  В базе есть таблица музыкальных треков и жанров Назовите среднюю стоимстость музыкального трека в каждом жанре?
+
+SELECT Name,
+       (
+           SELECT avg(UnitPrice) 
+             FROM tracks AS t
+            WHERE t.GenreId = g.GenreId
+       )
+       AS avg_price
+  FROM genres AS g
+ GROUP BY GenreId
+ ORDER BY avg_price DESC;
+
+-----  Покажите жанры у которых средняя стоимость одного трека больше 1-го рубля
+SELECT Name,
+       (
+           SELECT avg(UnitPrice) 
+             FROM tracks AS t
+            WHERE t.GenreId = g.GenreId
+       )
+       AS avg_price
+  FROM genres AS g
+ WHERE avg_price > 1
+ GROUP BY GenreId
+ ORDER BY avg_price DESC;
+
+--   Средняя цена по жанрам  
+SELECT Name ,
+       (
+       select avg(UnitPrice) from tracks as t
+        where t.GenreId = g.GenreId
+       )  as avg_price
+  FROM genres as g
+ group by GenreId
+ order by avg_price desc;
+  
+
+
+SELECT name,
+       city,
+       date_first,
+       date_last
+  FROM trip
+ WHERE DATEDIFF(date_last, date_first) = (
+                                             SELECT MIN(DATEDIFF(date_last, date_first) ) 
+                                               FROM trip
+                                         );
+
+
+
+

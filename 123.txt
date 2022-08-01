@@ -1,0 +1,2345 @@
+==========================================================  mySQL 8.029 =======================
+CREATE TABLE trip(
+	trip_id INT PRIMARY KEY AUTO_INCREMENT, 
+	name VARCHAR(30), 
+	city VARCHAR(25), 
+	per_diem DECIMAL(8, 2), 
+	date_first DATE, 
+	date_last DATE);
+	
+INSERT INTO trip(name, city, per_diem, date_first, date_last)
+VALUES 
+	('Баранов П.Е.', 'Москва', 700, '2020-01-12', '2020-01-17'),
+	('Абрамова К.А.', 'Владивосток', 450, '2020-01-14', '2020-01-27'),
+	('Семенов И.В.', 'Москва', 700, '2020-01-23', '2020-01-31'),
+	('Ильиных Г.Р.', 'Владивосток', 450, '2020-01-12', '2020-02-02'),
+	('Колесов С.П.', 'Москва', 700, '2020-02-01', '2020-02-06'),
+	('Баранов П.Е.', 'Москва', 700, '2020-02-14', '2020-02-22'),
+	('Абрамова К.А.', 'Москва', 700, '2020-02-23', '2020-03-01'),
+	('Лебедев Т.К.', 'Москва', 700, '2020-03-03', '2020-03-06'),
+	('Колесов С.П.', 'Новосибирск', 450, '2020-02-27', '2020-03-12'),
+	('Семенов И.В.', 'Санкт-Петербург', 700, '2020-03-29', '2020-04-05'),
+	('Абрамова К.А.', 'Москва', 700, '2020-04-06', '2020-04-14'),
+	('Баранов П.Е.', 'Новосибирск', 450, '2020-04-18', '2020-05-04'),
+	('Лебедев Т.К.', 'Томск', 450, '2020-05-20', '2020-05-31'),
+	('Семенов И.В.', 'Санкт-Петербург', 700, '2020-06-01', '2020-06-03'),
+	('Абрамова К.А.', 'Санкт-Петербург', 700, '2020-05-28', '2020-06-04'),
+	('Федорова А.Ю.', 'Новосибирск', 450, '2020-05-25', '2020-06-04'),
+	('Колесов С.П.', 'Новосибирск', 450, '2020-06-03', '2020-06-12'),
+	('Федорова А.Ю.', 'Томск', 450, '2020-06-20', '2020-06-26'),
+	('Абрамова К.А.', 'Владивосток', 450, '2020-07-02', '2020-07-13'),
+	('Баранов П.Е.', 'Воронеж', 450, '2020-07-19', '2020-07-25');
+
+SELECT * FROM trip;
+
+SELECT name, city, per_diem, date_first, date_last
+FROM trip
+WHERE name LIKE '%а %'
+ORDER BY date_last DESC;
+
+SELECT DISTINCT name
+FROM trip
+WHERE city LIKE 'Москва'
+ORDER BY NAME;
+
+SELECT city, COUNT(city) AS Количество
+FROM trip
+GROUP BY city
+ORDER BY city;
+
+SELECT city, COUNT(city) AS Количество
+FROM trip
+GROUP BY city
+ORDER BY COUNT(city) DESC
+LIMIT 2;
+
+SELECT name, city, date_first, date_last
+FROM trip
+WHERE DATEDIFF(date_last,date_first) = (
+SELECT MIN(DATEDIFF(date_last,date_first))
+FROM trip);
+
+SELECT name, city, date_first, date_last
+FROM trip
+WHERE MONTH(date_first) = MONTH(date_last)
+ORDER BY city, NAME;
+
+SELECT MONTHNAME(date_first) AS Месяц, 
+       COUNT(*)              AS Количество
+  FROM trip
+ GROUP BY 1
+ ORDER BY 2 DESC, 1;
+
+SELECT name, city, date_first, (DATEDIFF(date_last,date_first) + 1) * per_diem AS Сумма
+FROM trip
+WHERE MONTH(date_first) IN (2, 3)
+ORDER BY 1, 4;
+
+SELECT name, SUM((DATEDIFF(date_last,date_first) + 1) * per_diem) AS Сумма
+FROM trip
+GROUP BY NAME
+HAVING COUNT(*) > 3
+ORDER BY 2 DESC;
+
+/* ПРИМЕР ОФОРМЛЕНИЯ  */ =============================================================
+CREATE TABLE staff (
+       PRIMARY KEY (staff_num),
+         staff_num INT(5)       NOT NULL,
+        first_name VARCHAR(100) NOT NULL,
+    pens_in_drawer INT(2)       NOT NULL,
+                   CONSTRAINT pens_in_drawer_range
+                   CHECK(pens_in_drawer BETWEEN 1 AND 99)
+                    );
+                    
+SELECT r.last_name
+  FROM riders AS r
+       INNER JOIN bikes AS b
+       ON r.bike_vin_num = b.vin_num
+          AND b.engine_tally > 2
+
+       INNER JOIN crew AS c
+       ON r.crew_chief_last_name = c.last_name
+          AND c.chief = 'Y';
+			 SELECT r.last_name,
+       (SELECT MAX(YEAR(championship_date))
+          FROM champions AS c
+         WHERE c.last_name = r.last_name
+           AND c.confirmed = 'Y') AS last_championship_year
+           
+  FROM riders AS r
+ WHERE r.last_name IN
+       (SELECT c.last_name
+          FROM champions AS c
+         WHERE YEAR(championship_date) > '2008'
+           AND c.confirmed = 'Y');                    
+
+CREATE TABLE fine
+(
+ fine_id INT PRIMARY KEY AUTO_INCREMENT,
+ name VARCHAR(30),
+ number_plate VARCHAR(6),
+ violation VARCHAR(50),
+ sum_fine DECIMAL(8, 2),
+ date_violation DATE,
+ date_payment DATE
+);
+=======================================================================================================
+
+INSERT INTO fine (name, number_plate, violation, sum_fine, date_violation, date_payment)
+VALUES ('Баранов П.Е.', 'P523BT', 'Превышение скорости(от 40 до 60)', NULL, '2020-02-14', NULL),
+       ('Абрамова К.А.', 'О111AB', 'Проезд на запрещающий сигнал', NULL, '2020-02-23', NULL),
+       ('Яковлев Г.Р.', 'T330TT', 'Проезд на запрещающий сигнал', NULL, '2020-03-03', NULL),
+       ('Баранов П.Е.', 'P523BT', 'Превышение скорости(от 40 до 60)', 500.00, '2020-01-12', '2020-01-17'),
+       ('Абрамова К.А.', 'О111AB', 'Проезд на запрещающий сигнал', 1000.00, '2020-01-14', '2020-02-27'),
+       ('Яковлев Г.Р.', 'T330TT', 'Превышение скорости(от 20 до 40)', 500.00, '2020-01-23', '2020-02-23'),
+       ('Яковлев Г.Р.', 'M701AA', 'Превышение скорости(от 20 до 40)', NULL, '2020-01-12', NULL),
+       ('Колесов С.П.', 'K892AX', 'Превышение скорости(от 20 до 40)', NULL, '2020-02-01', NULL);
+
+CREATE TABLE traffic_violation
+(
+    violation_id INT PRIMARY KEY AUTO_INCREMENT,
+    violation    VARCHAR(50),
+    sum_fine     DECIMAL(8, 2)
+);
+
+INSERT INTO traffic_violation (violation, sum_fine)
+VALUES ('Превышение скорости(от 20 до 40)', 500),
+       ('Превышение скорости(от 40 до 60)', 1000),
+       ('Проезд на запрещающий сигнал', 1000);
+
+       
+SELECT  f.name, f.number_plate, f.violation, 
+   if(
+    f.sum_fine = tv.sum_fine, "Стандартная сумма штрафа", 
+    if(
+      f.sum_fine < tv.sum_fine, "Уменьшенная сумма штрафа", "Увеличенная сумма штрафа"
+    )
+  ) AS description               
+FROM  fine f, traffic_violation tv
+WHERE tv.violation = f.violation and f.sum_fine IS NOT NULL;
+
+UPDATE traffic_violation tv, fine f 
+SET f.sum_fine = tv.sum_fine
+WHERE f.violation = tv.violation AND f.sum_fine IS NULL;
+SELECT * FROM fine;     
+
+SELECT name, number_plate, violation, sum_fine
+FROM fine
+GROUP BY name, number_plate, violation
+HAVING COUNT(*) > 1
+ORDER BY 1,2,3;
+
+UPDATE fine, 
+   (
+     SELECT name, number_plate, violation
+     FROM fine
+     GROUP BY name, number_plate, violation
+     HAVING COUNT(*) > 1
+   ) query_in
+SET sum_fine = sum_fine * 2
+WHERE date_payment IS NULL AND 
+      fine.name = query_in.name AND 
+		fine.number_plate = query_in.number_plate AND 
+		fine.violation = query_in.violation ;
+SELECT *
+FROM fine
+ORDER BY date_payment DESC;
+
+/*   в таблицу fine занести дату оплаты соответствующего штрафа из таблицы payment; 
+уменьшить начисленный штраф в таблице fine в два раза  (только для тех штрафов, 
+информация о которых занесена в таблицу payment), если оплата произведена не позднее 20 дней со дня нарушения. */
+
+UPDATE payment p, fine f 
+SET f.date_payment = p.date_payment,
+    f .sum_fine = IF(DATEDIFF(p.date_payment, p.date_violation) <= 20, f.sum_fine/2, f.sum_fine)
+WHERE f.date_payment IS NULL AND 
+      f.name = p.name AND 
+	   f.number_plate = p.number_plate AND 
+	   f.violation = p.violation;
+SELECT *
+FROM fine;
+
+/* Создать новую таблицу back_payment, куда внести информацию о неоплаченных штрафах 
+(Фамилию и инициалы водителя, номер машины, нарушение, сумму штрафа  и  дату нарушения) из таблицы fine. */
+
+CREATE TABLE back_payment AS
+SELECT NAME, number_plate, violation, sum_fine, date_violation
+FROM fine
+WHERE date_payment IS null;
+
+SELECT * FROM back_payment;
+
+
+/* Удалить из таблицы fine информацию о нарушениях, совершенных раньше 1 февраля 2020 года.  */
+
+DELETE FROM fine
+WHERE date_violation < '2020.03.02' ;
+SELECT * FROM fine; 
+
+/*  Создать таблицу author   */
+CREATE TABLE author
+(
+ author_id INT PRIMARY KEY AUTO_INCREMENT,
+ name_author VARCHAR(30)
+);
+
+/*   */
+INSERT INTO author (name_author)
+VALUES ('Булгаков М.А.'),
+       ('Достоевский Ф.М.'),
+       ('Есенин С.А.'),
+       ('Пастернак Б.Л.');
+
+/* Создать таблицу book следующей структуры:
+book_id	INT PRIMARY KEY AUTO_INCREMENT |	 
+title	VARCHAR(50) |	 
+author_id	INT  |
+	внешний ключ:
+главная таблица author,
+связанный столбец author.author_id,
+пустое значение не допускается | 
+price	DECIMAL(8, 2)	 
+amount	INT    */
+CREATE TABLE book (
+    book_id INT PRIMARY KEY AUTO_INCREMENT, 
+    title VARCHAR(50), 
+    author_id INT NOT NULL, 
+    price DECIMAL(8,2), 
+    amount INT, 
+    FOREIGN KEY (author_id)  REFERENCES author (author_id) 
+);
+
+/* 
+Перепишите запрос на создание таблицы book , 
+чтобы ее структура соответствовала структуре, показанной на логической схеме */
+
+
+/*  Создать таблицу book той же структуры, что и на предыдущем шаге. 
+Будем считать, что при удалении автора из таблицы author, должны удаляться все записи о книгах из таблицы book,
+ написанные этим автором. А при удалении жанра из таблицы genre для соответствующей записи book установить
+  значение Null в столбце genre_id. */
+CREATE TABLE book (
+    book_id INT PRIMARY KEY AUTO_INCREMENT, 
+    title VARCHAR(50), 
+    author_id INT NOT NULL, 
+    genre_id INT,
+    price DECIMAL(8,2), 
+    amount INT, 
+    FOREIGN KEY (author_id)  REFERENCES author (author_id) ON DELETE CASCADE,
+    FOREIGN KEY (genre_id)  REFERENCES genre (genre_id) ON DELETE SET NULL
+);
+
+/*   */
+INSERT INTO book (title, author_id, genre_id, price, amount)
+VALUES ('Стихотворения и поэмы', 3, 2, 650.00, 15),
+       ('Черный человек', 3, 2, 570.20, 6),
+       ('Лирика', 4, 2, 518.99, 2);
+       
+/* Вывести название, жанр и цену тех книг, количество которых больше 8, в отсортированном по убыванию цены виде. */
+SELECT title, name_genre, price
+FROM 
+    genre INNER JOIN book
+    ON genre.genre_id = book.genre_id
+    WHERE amount > 8
+ORDER BY price DESC;
+
+/* Вывести название всех книг каждого автора, если книг некоторых авторов в данный момент нет на складе – 
+   вместо названия книги указать Null. */
+SELECT name_author, title 
+FROM author LEFT JOIN book
+     ON author.author_id = book.author_id
+ORDER BY name_author;
+
+/*  Вывести все жанры, которые не представлены в книгах на складе. */
+SELECT name_genre
+FROM genre LEFT JOIN book
+     ON genre.genre_id = book.genre_id
+WHERE amount IS NULL;
+
+/*Необходимо в каждом городе провести выставку книг каждого автора в течение 2020 года. 
+Дату проведения выставки выбрать случайным образом. Создать запрос, который выведет город, автора
+ и дату проведения выставки. Последний столбец назвать Дата. Информацию вывести, отсортировав сначала
+  в алфавитном порядке по названиям городов, а потом по убыванию дат проведения выставок.  */
+  
+/*   Вывести информацию о тех книгах, их авторах и жанрах, 
+     цена которых принадлежит интервалу от 500  до 700 рублей  включительно.  */
+SELECT title, name_author, name_genre, price, amount
+FROM
+    author 
+    INNER JOIN  book ON author.author_id = book.author_id
+    INNER JOIN genre ON genre.genre_id = book.genre_id
+WHERE price BETWEEN 500 AND 700;
+
+/* Вывести информацию о книгах (жанр, книга, автор), относящихся к жанру, 
+   включающему слово «роман» в отсортированном по названиям книг виде.  */
+SELECT title, name_author, name_genre
+FROM
+    author 
+    INNER JOIN  book ON author.author_id = book.author_id
+    INNER JOIN genre ON genre.genre_id = book.genre_id
+WHERE genre = '% роман %'
+ORDER BY title;  
+
+book
+   JOIN genre ON book.genre_id = genre.genre_id
+   JOIN author ON book.author_id = author.author_id
+    
+/*  Посчитать количество экземпляров  книг каждого автора из таблицы author.  
+    Вывести тех авторов,  количество книг которых меньше 10, в отсортированном по возрастанию количества виде. */
+SELECT name_author, SUM(amount) AS Количество
+FROM 
+   author LEFT JOIN book
+   on author.author_id = book.author_id
+GROUP BY name_author
+HAVING SUM(amount) < 10 OR SUM(amount) IS NULL
+ORDER BY Количество;
+
+/*  Вывести авторов, общее количество книг которых на складе максимально.   */
+SELECT name_author, SUM(amount) as Количество
+FROM 
+    author INNER JOIN book
+    on author.author_id = book.author_id
+GROUP BY name_author
+HAVING SUM(amount) = 
+     (/* вычисляем максимальное из общего количества книг каждого автора */
+      SELECT MAX(sum_amount) AS max_sum_amount
+      FROM 
+          (/* считаем количество книг каждого автора */
+            SELECT author_id, SUM(amount) AS sum_amount 
+            FROM book GROUP BY author_id
+          ) query_in
+      );
+      
+/*   Вывести в алфавитном порядке всех авторов, которые пишут только в одном жанре.   */
+SELECT name_author
+FROM
+    author a 
+    INNER JOIN  book b ON a.author_id = b.author_id
+    INNER JOIN genre g ON g.genre_id = b.genre_id
+GROUP BY name_author     
+HAVING COUNT(DISTINCT b.genre_id) < 2
+ORDER BY 1;
+
+/*  Вывести авторов, пишущих книги в самом популярном жанре. Указать этот жанр.  */
+SELECT  name_author, name_genre
+FROM 
+    author 
+    INNER JOIN book ON author.author_id = book.author_id
+    INNER JOIN genre ON  book.genre_id = genre.genre_id
+GROUP BY name_author,name_genre, genre.genre_id
+HAVING genre.genre_id IN
+         (/* выбираем автора, если он пишет книги в самых популярных жанрах*/
+          SELECT query_in_1.genre_id
+          FROM 
+              ( /* выбираем код жанра и количество произведений, относящихся к нему */
+                SELECT genre_id, SUM(amount) AS sum_amount
+                FROM book
+                GROUP BY genre_id
+               )query_in_1
+          INNER JOIN 
+              ( /* выбираем запись, в которой указан код жанр с максимальным количеством книг */
+                SELECT genre_id, SUM(amount) AS sum_amount
+                FROM book
+                GROUP BY genre_id
+                ORDER BY sum_amount DESC
+                LIMIT 1
+               ) query_in_2
+          ON query_in_1.sum_amount= query_in_2.sum_amount
+         );  
+         
+/*  Вывести информацию о книгах (название книги, фамилию и инициалы автора, название жанра, 
+   цену и количество экземпляров книг), написанных в самых популярных жанрах, в отсортированном
+	 в алфавитном порядке по названию книг виде   */
+SELECT  title, name_author, name_genre, price, amount
+FROM 
+    book b 
+    INNER JOIN author a ON a.author_id = b.author_id
+    INNER JOIN genre g ON  g.genre_id = b.genre_id
+WHERE b.genre_id IN
+         (/* выбираем автора, если он пишет книги в самых популярных жанрах*/
+          SELECT query_in_1.genre_id
+          FROM 
+              ( /* выбираем код жанра и количество произведений, относящихся к нему */
+                SELECT genre_id, SUM(amount) AS sum_amount
+                FROM book
+                GROUP BY genre_id
+               )query_in_1
+          INNER JOIN 
+              ( /* выбираем запись, в которой указан код жанр с максимальным количеством книг */
+                SELECT genre_id, SUM(amount) AS sum_amount
+                FROM book
+                GROUP BY genre_id
+                ORDER BY sum_amount DESC
+                LIMIT 1
+               ) query_in_2
+          ON query_in_1.sum_amount= query_in_2.sum_amount
+         )
+ORDER BY 1;         
+
+/*   2 макс зарплата, если нет меньше макс, то NULL  */
+SELECT
+    IFNULL(
+        (SELECT DISTINCT Salary
+        FROM Employee
+        ORDER BY Salary DESC
+        LIMIT 1 OFFSET 1
+        ), null) as SecondHighestSalary
+FROM Employee
+LIMIT 1;
+
+SELECT MAX(salary) AS SecondHighestSalary
+FROM Employee
+WHERE salary != (SELECT MAX(salary) FROM Employee)
+
+/*  Напишите SQL-запрос, который обнаружит в таблице Person все дублирующиеся адреса электронной почты.   */
+SELECT Email
+FROM (
+    SELECT Email, count(Email) AS count
+    FROM Person
+    GROUP BY Email
+) as email_count
+WHERE COUNT > 1;
+
+SELECT Email
+FROM Person
+GROUP BY Email
+HAVING count(Email) > 1;
+
+/*  в таблице Weather все даты (идентификаторы дат), 
+    когда температура была бы выше температуры на предшествующие им даты.   */
+SELECT DISTINCT a.Id
+FROM Weather a, Weather b
+WHERE a.Temperature > b.Temperature
+AND DATEDIFF(a.Recorddate, b.Recorddate) = 1;
+
+WHERE country = ‘Canada’ OR country = ‘USA’
+WHERE country IN (‘Canada’, ’USA’);
+
+/* Найти в каждом из подразделений сотрудников с максимальной заработной платой.    */    
+SELECT
+    Department.name AS 'Department',
+    Employee.name AS 'Employee',
+    Salary
+FROM Employee
+INNER JOIN Department ON Employee.DepartmentId = Department.Id
+WHERE (DepartmentId , Salary) 
+    IN
+    (   SELECT
+            DepartmentId, MAX(Salary)
+        FROM
+            Employee
+        GROUP BY DepartmentId
+ );
+
+/*  Поменять строчки местами- если нечетное кол-во то последнюю не менять  */ 
+SELECT 
+    CASE 
+        WHEN((SELECT MAX(id) FROM seat)%2 = 1) AND id = (SELECT MAX(id) FROM seat) THEN id
+        WHEN id%2 = 1 THEN id + 1
+        ELSE id - 1
+    END AS id, student
+FROM seat
+ORDER BY id;
+
+/* Если в таблицах supply  и book есть одинаковые книги,  вывести их название и автора. 
+   При этом учесть, что у нескольких авторов могут быть книги с одинаковым названием.  */
+   
+
+SELECT book.title, name_author
+FROM 
+    author 
+    INNER JOIN book USING (author_id)   
+    INNER JOIN supply ON book.title = supply.title 
+                         and author.name_author = supply.author;
+								 
+/*  Если в таблицах supply  и book есть одинаковые книги, которые имеют равную цену,  
+    вывести их название и автора, а также посчитать общее количество экземпляров книг в таблицах supply и book  */
+
+SELECT book.title AS Название, name_author AS Автор, (book.amount + supply.amount) AS Количество
+FROM 
+    author 
+    INNER JOIN book USING (author_id)   
+    INNER JOIN supply ON book.title = supply.title 
+                         and author.name_author = supply.author
+WHERE book.price = supply.price; 
+
+/*  Вывести, сколько книг написано в каждом жанре и сколько экземпляров каждого жанра на складе   */
+SELECT name_genre Жанр, COUNT(book_id) Книги, IF(SUM(amount) > 0, SUM(amount), 0) Экземпляры 
+FROM genre 
+LEFT JOIN book USING(genre_id)
+GROUP BY 1;
+
+/*   */
+SELECT name_author Автор, title Название, price Минимальная_Цена, name_genre Жанр
+FROM book
+INNER JOIN author USING (author_id)
+INNER JOIN genre USING (genre_id)
+WHERE price IN (
+SELECT MIN(price)
+FROM book
+GROUP BY genre_id) ;
+
+/* Для книг, которые уже есть на складе (в таблице book) по той же цене, что и в поставке (supply), 
+   увеличить количество на значение, указанное в поставке, а также обнулить количество этих книг в поставке. */
+UPDATE book 
+     INNER JOIN author ON author.author_id = book.author_id
+     INNER JOIN supply ON book.title = supply.title 
+                         and supply.author = author.name_author
+SET book.amount = book.amount + supply.amount,
+    supply.amount = 0   
+WHERE book.price = supply.price;
+
+/*   Для книг, которые уже есть на складе (в таблице book), но по другой цене, чем в поставке (supply),  
+     необходимо в таблице book увеличить количество на значение, указанное в поставке,  и пересчитать цену. 
+	  А в таблице  supply обнулить количество этих книг.  */   
+UPDATE book 
+     INNER JOIN author ON author.author_id = book.author_id
+     INNER JOIN supply ON book.title = supply.title 
+                         and supply.author = author.name_author
+SET book.price = (book.price*book.amount + supply.price*supply.amount)/(book.amount+supply.amount),
+    book.amount = book.amount + supply.amount,
+    supply.amount = 0
+    WHERE book.price <> supply.price;
+    
+/*  В таблице supply  есть новые книги, которых на складе еще не было. Прежде чем добавлять их в таблицу book, 
+    необходимо из таблицы supply отобрать новых авторов, если таковые имеются. */  
+SELECT supply.author
+FROM 
+    author 
+    RIGHT JOIN supply on author.name_author = supply.author
+WHERE name_author IS Null;
+	
+/* Включить новых авторов в таблицу author с помощью запроса на добавление, а затем вывести все данные из таблицы
+   author.  Новыми считаются авторы, которые есть в таблице supply, но нет в таблице author.   */	     
+UPDATE author 
+    RIGHT JOIN supply ON author.name_author = supply.author
+    SET author.name_author = supply.author
+WHERE name_author IS Null;   
+	   
+/*   */								    
+INSERT INTO author (name_author) 
+SELECT supply.author
+FROM author
+    RIGHT JOIN supply ON author.name_author = supply.author
+WHERE name_author IS Null; 
+SELECT * author;       
+
+/*  добавить новые записи о книгах, которые есть в таблице supply и нет в таблице book */
+INSERT INTO book(title, author_id, price, amount)
+SELECT title, author_id, price, amount
+FROM 
+    author a
+    INNER JOIN supply s 
+    ON a.name_author = s.author
+WHERE amount <> 0;
+SELECT * from book;
+
+/* Занести для книги «Стихотворения и поэмы» Лермонтова жанр «Поэзия», а для книги «Остров сокровищ» Стивенсона
+    - «Приключения». (Использовать два запроса).  */
+UPDATE book
+SET genre_id = 
+      (
+       SELECT genre_id 
+       FROM genre 
+       WHERE name_genre = 'Поэзия'
+      )
+WHERE author_id =
+      (
+       SELECT author_id 
+       FROM author 
+       WHERE name_author LIKE '%Лермонтов%'
+      )       
+       AND title LIKE '%Стихотворения и поэмы%';       
+      
+UPDATE book
+SET genre_id = 
+      (
+       SELECT genre_id 
+       FROM genre 
+       WHERE name_genre = 'Приключения'
+      )
+WHERE author_id = 
+      (
+       SELECT author_id 
+       FROM author 
+       WHERE name_author LIKE '%Стивенсон%' 
+      ) 
+      AND title LIKE '%Остров сокровищ%';
+
+SELECT * FROM book;
+
+/* Удалим из таблицы author всех авторов, фамилия которых начинается на «Д», а из таблицы book  - 
+   все книги этих авторов.  */
+DELETE FROM author
+WHERE name_author LIKE "Д%";
+
+SELECT * FROM author;
+
+SELECT * FROM book;
+
+/* Удалить всех авторов и все их книги, общее количество книг которых меньше 20.  */
+DELETE FROM author
+WHERE name_author = 
+      (SELECT name_author 
+       FROM book
+       GROUP BY name_author
+       HAVING SUM(amount) < 20
+       );
+SELECT * FROM author;
+SELECT * FROM book;
+
+/* Удалить всех авторов и все их книги, общее количество книг которых меньше 20.  */  
+DELETE FROM author
+WHERE author_id IN
+      (SELECT author_id       
+       FROM book
+       group by author_id
+       having SUM(amount) < 20
+       );
+SELECT * FROM author;
+SELECT * FROM book;
+
+/* Удалить все жанры, к которым относится меньше 4-х книг. В таблице book для этих жанров установить значение Null. */
+DELETE FROM genre
+WHERE genre_id IN
+      (SELECT genre_id    
+       FROM book
+       group by genre_id
+       having COUNT(*) < 4
+       );
+SELECT * FROM genre;
+SELECT * FROM book;
+
+/* Удалить всех авторов, которые пишут в жанре "Поэзия". Из таблицы book удалить все книги этих авторов. 
+   В запросе для отбора авторов использовать полное название жанра, а не его id.  */
+DELETE FROM author
+USING 
+    author 
+    INNER JOIN book ON author.author_id = book.author_id
+WHERE genre_id IN
+     (
+      SELECT genre_id    
+      FROM genre
+      WHERE genre_name LIKE '%Поэзия%' 
+      );    
+SELECT * FROM author;
+SELECT * FROM book;
+
+DELETE FROM author
+USING
+     author
+     INNER JOIN book ON author.author_id = book.author_id
+     INNER JOIN genre ON genre.genre_id = book.genre_id  
+     AND  genre.name_genre = 'Поэзия';
+SELECT * FROM author;
+SELECT * FROM book;
+
+/*   */
+INSERT INTO genre (name_genre)
+VALUES ('Триллер');
+UPDATE book
+SET genre_id = 
+      (
+       SELECT genre_id 
+       FROM genre 
+       WHERE name_genre = 'Триллер'
+      )
+WHERE author_id IN
+      (
+       SELECT author_id 
+       FROM author 
+       WHERE name_author LIKE '%Булгаков%' OR name_author LIKE '%Пастернак%'
+      ); 
+
+SELECT name_author AS Автор, title AS Название, name_genre AS Жанр , price AS Цена, amount AS Количество 
+FROM book
+LEFT JOIN genre USING(genre_id) 
+LEFT JOIN author USING(author_id)
+ORDER BY 1, 2, 3;
+
+/*  NEW DATABASE ----  BOOKSHOP ----- */
+/* Вывести фамилии всех клиентов, которые заказали книгу Булгакова «Мастер и Маргарита».  */
+SELECT DISTINCT name_client
+FROM 
+    client 
+    INNER JOIN buy ON client.client_id = buy.client_id
+    INNER JOIN buy_book ON buy_book.buy_id = buy.buy_id
+    INNER JOIN book ON buy_book.book_id=book.book_id
+WHERE title ='Мастер и Маргарита' and author_id = 1; 
+
+/*  Перенос данных из одной таблицы в другую */
+INSERT INTO book (title, author, price, amount) 
+SELECT title, author, price, amount 
+FROM supply;
+
+
+===================================  SQL TEST =======================================
+
+SELECT *
+FROM orders
+WHERE order_date IN 
+   ( SELECT MIN(order_date)
+     FROM orders
+     GROUP BY order_date
+   );
+
+SELECT YEAR(order_date) AS Год, MONTH(order_date) AS Месяц,
+   (SELECT COUNT(*) FROM orders
+	 GROUP BY MONTH(order_date) 
+	 HAVING delivered_flag = 'N'),
+	 (SELECT COUNT(*) FROM orders
+	 GROUP BY MONTH(order_date) 
+	 HAVING delivered_flag = 'Y'),
+ FROM orders
+ORDER BY 1;
+
+DELETE FROM orders
+ WHERE order_id = 12;
+
+INSERT INTO orders (order_number, order_date, city_id, depart_date, delivered_flag) VALUES 
+('6005', '2022-03-04', 7, NULL, 'N');
+
+SELECT o.*
+  FROM orders o
+ GROUP BY city_id
+HAVING COUNT(o.city_id) =1
+ ORDER BY o.order_date DESC 
+ LIMIT 1;
+
+
+SELECT (COUNT(order_id))
+  FROM orders;
+
+
+SELECT YEAR(order_date) AS Год, 
+       MONTH(order_date) AS Месяц,
+       COUNT(IF(delivered_flag = 'Y', order_id, NULL)) AS Доставленные,
+       COUNT(IF(delivered_flag = 'N', order_id, NULL)) AS Недоставленные
+FROM orders
+GROUP BY YEAR(order_date), MONTH(order_date)
+ORDER BY 1 DESC, 2 DESC;  
+
+===============================================================================================
+
+CREATE TABLE author (
+    author_id INT PRIMARY KEY AUTO_INCREMENT,
+    name_author VARCHAR(50)
+);
+
+INSERT INTO author (name_author)
+VALUES ('Булгаков М.А.'),
+       ('Достоевский Ф.М.'),
+       ('Есенин С.А.'),
+       ('Пастернак Б.Л.'),
+       ('Лермонтов М.Ю.');
+
+CREATE TABLE genre (
+    genre_id INT PRIMARY KEY AUTO_INCREMENT,
+    name_genre VARCHAR(30)
+);
+
+INSERT INTO genre(name_genre)
+VALUES ('Роман'),
+       ('Поэзия'),
+       ('Приключения');
+
+CREATE TABLE book (
+    book_id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(50),
+    author_id INT NOT NULL,
+    genre_id INT,
+    price DECIMAL(8, 2),
+    amount INT,
+    FOREIGN KEY (author_id)
+        REFERENCES author (author_id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (genre_id)
+        REFERENCES genre (genre_id)
+        ON DELETE SET NULL
+);
+
+INSERT INTO book (title, author_id, genre_id, price, amount)
+VALUES  ('Мастер и Маргарита', 1, 1, 670.99, 3),
+        ('Белая гвардия ', 1, 1, 540.50, 5),
+        ('Идиот', 2, 1, 460.00, 10),
+        ('Братья Карамазовы', 2, 1, 799.01, 2),
+        ('Игрок', 2, 1, 480.50, 10),
+        ('Стихотворения и поэмы', 3, 2, 650.00, 15),
+        ('Черный человек', 3, 2, 570.20, 6),
+        ('Лирика', 4, 2, 518.99, 2);
+
+CREATE TABLE city (
+    city_id INT PRIMARY KEY AUTO_INCREMENT,
+    name_city VARCHAR(30),
+    days_delivery INT
+);
+
+INSERT INTO city(name_city, days_delivery)
+VALUES ('Москва', 5),
+       ('Санкт-Петербург', 3),
+       ('Владивосток', 12);
+
+CREATE TABLE client (
+    client_id INT PRIMARY KEY AUTO_INCREMENT,
+    name_client VARCHAR(50),
+    city_id INT,
+    email VARCHAR(30),
+    FOREIGN KEY (city_id) REFERENCES city (city_id)
+);
+
+INSERT INTO client(name_client, city_id, email)
+VALUES ('Баранов Павел', 3, 'baranov@test'),
+       ('Абрамова Катя', 1, 'abramova@test'),
+       ('Семенонов Иван', 2, 'semenov@test'),
+       ('Яковлева Галина', 1, 'yakovleva@test');
+
+CREATE TABLE buy(
+    buy_id INT PRIMARY KEY AUTO_INCREMENT,
+    buy_description VARCHAR(100),
+    client_id INT,
+    FOREIGN KEY (client_id) REFERENCES client (client_id)
+);
+
+INSERT INTO buy (buy_description, client_id)
+VALUES ('Доставка только вечером', 1),
+       (NULL, 3),
+       ('Упаковать каждую книгу по отдельности', 2),
+       (NULL, 1);
+
+CREATE TABLE buy_book (
+    buy_book_id INT PRIMARY KEY AUTO_INCREMENT,
+    buy_id INT,
+    book_id INT,
+    amount INT,
+    FOREIGN KEY (buy_id) REFERENCES buy (buy_id),
+    FOREIGN KEY (book_id) REFERENCES book (book_id)
+);
+
+INSERT INTO buy_book(buy_id, book_id, amount)
+VALUES (1, 1, 1),
+       (1, 7, 2),
+       (1, 3, 1),
+       (2, 8, 2),
+       (3, 3, 2),
+       (3, 2, 1),
+       (3, 1, 1),
+       (4, 5, 1);
+
+CREATE TABLE step (
+    step_id INT PRIMARY KEY AUTO_INCREMENT,
+    name_step VARCHAR(30)
+);
+
+INSERT INTO step(name_step)
+VALUES ('Оплата'),
+       ('Упаковка'),
+       ('Транспортировка'),
+       ('Доставка');
+
+CREATE TABLE buy_step (
+    buy_step_id INT PRIMARY KEY AUTO_INCREMENT,
+    buy_id INT,
+    step_id INT,
+    date_step_beg DATE,
+    date_step_end DATE,
+    FOREIGN KEY (buy_id) REFERENCES buy (buy_id),
+    FOREIGN KEY (step_id) REFERENCES step (step_id)
+);
+
+INSERT INTO buy_step(buy_id, step_id, date_step_beg, date_step_end)
+VALUES (1, 1, '2020-02-20', '2020-02-20'),
+       (1, 2, '2020-02-20', '2020-02-21'),
+       (1, 3, '2020-02-22', '2020-03-07'),
+       (1, 4, '2020-03-08', '2020-03-08'),
+       (2, 1, '2020-02-28', '2020-02-28'),
+       (2, 2, '2020-02-29', '2020-03-01'),
+       (2, 3, '2020-03-02', NULL),
+       (2, 4, NULL, NULL),
+       (3, 1, '2020-03-05', '2020-03-05'),
+       (3, 2, '2020-03-05', '2020-03-06'),
+       (3, 3, '2020-03-06', '2020-03-10'),
+       (3, 4, '2020-03-11', NULL),
+       (4, 1, '2020-03-20', NULL),
+       (4, 2, NULL, NULL),
+       (4, 3, NULL, NULL),
+       (4, 4, NULL, NULL);
+       
+/*  Заказы Баранова              */
+SELECT buy_id 'Номер заказа', title Название, price Цена, buy_book.amount Количество
+FROM 
+   client 
+   INNER JOIN buy USING(client_id)
+   INNER JOIN buy_book USING(buy_id)
+   INNER JOIN book USING(book_id)
+WHERE name_client = 'Баранов Павел'
+ORDER BY 1, 2; 
+ 
+/* all orders with Master And Margarita   */ 
+SELECT name_client, GROUP_CONCAT(title SEPARATOR '; ') titles, buy.buy_id, SUM(book.amount)
+FROM 
+    client 
+    INNER JOIN buy ON client.client_id = buy.client_id
+    INNER JOIN buy_book ON buy_book.buy_id = buy.buy_id
+    INNER JOIN book ON buy_book.book_id=book.book_id
+GROUP BY buy.buy_id
+HAVING titles LIKE '%Мастер и Маргарита%';
+
+/* Посчитать, сколько раз была заказана каждая книга  */
+SELECT name_author, title, COUNT(buy_book.book_id) Количество
+FROM 
+   book 
+   LEFT JOIN buy_book USING(book_id)
+   INNER JOIN author USING(author_id)
+GROUP BY title, name_author
+ORDER BY 1, 2;
+   
+/*   */
+SELECT name_city, COUNT(client_id) Количество
+FROM 
+   city 
+   LEFT JOIN client USING(city_id)
+   INNER JOIN buy USING(client_id)
+GROUP BY name_city
+ORDER BY 2 DESC, 1; 
+
+SELECT * FROM buy_step;  
+
+/* Даты оплаченных заказов   */ 
+SELECT buy_id, date_step_end 
+FROM 
+   step 
+   LEFT JOIN buy_step USING(step_id)
+WHERE date_step_end IS NOT NULL
+AND step_id = 1;
+
+/*  Вывести информацию о каждом заказе: его номер, кто его сформировал (фамилия пользователя) и его стоимость 
+    (сумма произведений количества заказанных книг и их цены), в отсортированном по номеру заказа виде.  */
+SELECT buy_id, name_client, SUM(price * buy_book.amount) Стоимость
+FROM 
+   book 
+   INNER JOIN buy_book USING(book_id)
+   INNER JOIN buy USING(buy_id)
+   INNER JOIN client USING(client_id)
+GROUP BY buy_id, name_client
+ORDER BY 1; 
+
+/* Вывести номера заказов (buy_id) и названия этапов,  на которых они в данный момент находятся. 
+   Если заказ доставлен –  информацию о нем не выводить  */
+SELECT buy_id, name_step
+FROM 
+   buy_step
+	LEFT JOIN step USING(step_id)
+WHERE date_step_beg IS NOT NULL 
+AND  date_step_end IS NULL;
+
+/* Для тех заказов, которые прошли этап транспортировки, вывести количество дней за которое заказ реально доставлен в 
+   город. А также, если заказ доставлен с опозданием, указать количество дней задержки, в противном случае вывести 0. */
+SELECT 
+   buy_id,
+   DATEDIFF(date_step_end, date_step_beg) Количество_дней,
+   IF((SELECT(Количество_дней)) > days_delivery, (SELECT(Количество_дней)) - days_delivery, 0) Опоздание 
+	/* Вместо оператора IF() можно использовать функцию GREATEST(). Данная функция возвращает наибольшее значение. 
+	   Общий вид функции выглядит следующим образом:
+
+      GREATEST(значение_1, значение_2)
+      В данной задаче, если заказ доставлен с опозданием, требуется вывести количество дней задержки, 
+		в противном случае вывести 0, получается функцию GREATEST() можно использовать следующим образом:
+
+      GREATEST(*сколько_дней_доставляли - за_сколько_дней_должны_были_доставить*, 0)
+      Если доставили быстрее чем должны были, то разница будет отрицательной и функция выдаст 0. 
+		Если с доставкой опоздали - функция выдаст разницу (то есть количество дней задержки).
+		Итого вместо строчки IF: 
+		
+		GREATEST((SELECT Количество_дней) - days_delivery, 0) AS Опоздание            */      
+FROM 
+   buy 
+   INNER JOIN client USING(client_id)
+   INNER JOIN city USING(city_id)
+   INNER JOIN buy_step USING(buy_id)
+WHERE step_id = 3 AND date_step_end IS NOT NULL  
+ORDER BY 1;	 
+
+/* Выбрать всех клиентов, которые заказывали книги Достоевского, информацию вывести в отсортированном по алфавиту виде. 
+   В решении используйте фамилию автора, а не его id.  */
+SELECT name_client
+FROM 
+    buy_book 
+    INNER JOIN book USING(book_id)
+    INNER JOIN author USING(author_id)
+    INNER JOIN buy USING(buy_id)
+    INNER JOIN client USING(client_id)    
+WHERE name_author LIKE '%Достоевский%'
+GROUP BY name_client  /* Or instead of GROUP BY --->  SELECT DISTINCT*/
+ORDER BY 1;   
+
+/* Вывести жанр (или жанры), в котором было заказано больше всего экземпляров книг, указать это количество. 
+   Последний столбец назвать Количество.  */
+SELECT name_genre, SUM(buy_book.amount) as Количество
+FROM 
+   book 
+	INNER JOIN genre USING(genre_id)
+   INNER JOIN buy_book USING(book_id)
+GROUP BY name_genre
+HAVING SUM(buy_book.amount) = 
+     (/* вычисляем максимальное из общего количества книг каждого жанра */
+      SELECT MAX(sum_amount)
+      FROM 
+          (/* считаем количество книг каждого жанра */
+            SELECT genre_id, SUM(buy_book.amount) AS sum_amount
+				FROM 
+              book 
+	           INNER JOIN genre USING(genre_id)
+              INNER JOIN buy_book USING(book_id) 
+				  GROUP BY genre_id
+          ) temp
+      );   
+      
+/* Вывести информацию об оплаченных заказах за предыдущий и текущий год, информацию отсортировать по  client_id  */
+SELECT buy_id, client_id, book_id, date_payment, amount, price
+FROM 
+    buy_archive
+UNION ALL
+SELECT buy.buy_id, client_id, book_id, date_step_end, buy_book.amount, price
+FROM 
+    book 
+    INNER JOIN buy_book USING(book_id)
+    INNER JOIN buy USING(buy_id) 
+    INNER JOIN buy_step USING(buy_id)
+    INNER JOIN step USING(step_id)                  
+WHERE  date_step_end IS NOT NULL AND name_step = "Оплата"
+ORDER BY client_id;
+
+/*   */
+
+SELECT YEAR(date_payment) Год, MONTHNAME(date_payment) Месяц, SUM(amount * price) Сумма
+FROM 
+    buy_archive
+    GROUP BY 1,2  /*  Лучше сначала МЕСЯЦ, а потом ГОД*/
+UNION ALL
+SELECT YEAR(date_payment) Год, MONTHNAME(date_payment) Месяц, SUM(buy_book.amount * price) Сумма 
+FROM 
+    book 
+    INNER JOIN buy_book USING(book_id)
+    INNER JOIN buy USING(buy_id) 
+    INNER JOIN buy_step USING(buy_id)
+    INNER JOIN step USING(step_id)                  
+WHERE  date_step_end IS NOT Null and name_step = "Оплата"
+
+/* Вывести клиентов, которые делали покупки в прошлом году, но не делали в этом. 
+   А также новых клиентов, которые делали заказы только в текущем году.  */
+SELECT name_client, MIN(YEAR(first_payment)) AS Год
+FROM
+  (
+   SELECT name_client, MIN(date_payment) AS first_payment
+   FROM 
+       buy_archive 
+       INNER JOIN client USING(client_id)
+   GROUP BY  name_client
+   UNION
+   SELECT name_client, MIN(date_step_end)
+   FROM 
+       buy 
+       INNER JOIN client USING(client_id)
+       INNER JOIN buy_step USING (buy_id)
+   GROUP BY name_client
+  ) query_in
+GROUP BY name_client
+HAVING COUNT(*) = 1  /*Оставим только тех клиентов, которые встречаются в полученной таблице один раз,*/
+ORDER BY 2;
+
+/* Для каждой отдельной книги необходимо вывести информацию о количестве проданных экземпляров 
+   и их стоимости за текущий и предыдущий год   */
+SELECT title, SUM(temp.Количество) Количество, SUM(temp.Сумма) Сумма
+FROM 
+   (
+SELECT title, SUM(ba.amount) Количество, SUM(ba.price * ba.amount) Сумма
+FROM 
+  buy_archive ba
+  JOIN book USING(book_id)
+GROUP BY 1
+UNION ALL
+SELECT title, SUM(b.amount) Количество, SUM(b.price * b.amount) Сумма
+FROM 
+   book b
+   INNER JOIN buy_book USING(book_id)
+   INNER JOIN buy USING(buy_id) 
+   INNER JOIN buy_step USING(buy_id)
+   INNER JOIN step USING(step_id)                  
+WHERE  date_step_end IS NOT Null and name_step = "Оплата"     
+GROUP BY 1
+   ) temp
+GROUP BY 1
+ORDER BY 3;
++-----------------------+------------+---------+
+| title                 | Количество | Сумма   |
++-----------------------+------------+---------+
+| Братья Карамазовы     | 8          | 6247.20 |
+| Мастер и Маргарита    | 6          | 4024.38 |
+| Идиот                 | 5          | 2281.80 |
+| Белая гвардия         | 3          | 1581.10 |
+| Черный человек        | 2          | 1140.40 |
+| Лирика                | 2          | 1037.98 |
+| Игрок                 | 2          | 961.80  |
+| Стихотворения и поэмы | 1          | 650.00  |
++-----------------------+------------+---------+
+
+/* Вывести названия книг, которые ни разу не были заказаны  */ 
+
+SELECT name_author АВТОР, title НАЗВАНИЕ, b.amount ОСТАТОК, b.price * b.amount СУММА
+FROM book b
+JOIN author USING(author_id)
+LEFT JOIN buy_book USING(book_id)
+WHERE buy_book_id IS NULL
+ORDER BY 4 DESC;
++------------------+-----------------------+---------+---------+
+| АВТОР            | НАЗВАНИЕ              | ОСТАТОК | СУММА   |
++------------------+-----------------------+---------+---------+
+| Есенин С.А.      | Стихотворения и поэмы | 15      | 9750.00 |
+| Достоевский Ф.М. | Братья Карамазовы     | 3       | 2397.03 |
++------------------+-----------------------+---------+---------+
+
+/* (из каких городов в сумме больше заказов)  */
+SELECT name_city Город, SUM(bb.amount) Количество, SUM(b.price * bb.amount) Сумма
+FROM 
+   book b
+   INNER JOIN buy_book bb USING(book_id)
+   INNER JOIN buy USING(buy_id) 
+   INNER JOIN buy_step USING(buy_id)
+   INNER JOIN step USING(step_id)
+   INNER JOIN client USING(client_id)
+   INNER JOIN city USING(city_id)
+WHERE  date_step_end IS NOT Null and name_step = "Оплата"     
+GROUP BY 1
+ORDER BY 3 DESC;
++-----------------+------------+----------+
+| Город           | Количество | Сумма    |
++-----------------+------------+----------+
+| Владивосток     | 19         | 10034.17 |
+| Москва          | 18         | 9315.47  |
+| Санкт-Петербург | 2          | 1037.98  |
++-----------------+------------+----------+
+
+/* (из каких городов идут самые крупные заказы)  */
+
+SELECT name_city Город, MAX(b.price * bb.amount) Сумма_max_заказа
+FROM 
+   book b
+   INNER JOIN buy_book bb USING(book_id)
+   INNER JOIN buy USING(buy_id) 
+   INNER JOIN buy_step USING(buy_id)
+   INNER JOIN step USING(step_id)
+   INNER JOIN client USING(client_id)
+   INNER JOIN city USING(city_id)
+WHERE  date_step_end IS NOT Null and name_step = "Оплата"     
+GROUP BY name_client, name_city
+ORDER BY 2 DESC;
++-----------------+------------------+
+| Город           | Сумма_max_заказа |
++-----------------+------------------+
+| Владивосток     | 1140.40          |
+| Санкт-Петербург | 1037.98          |
+| Москва          | 920.00           |
++-----------------+------------------+
+
+/*  Включить нового человека в таблицу с клиентами. Его имя Попов Илья, его email popov@test, проживает он в Москве.  */
+
+INSERT INTO client (name_client, city_id, email)
+SELECT 'Попов Илья', city_id, 'popov@test'
+FROM city
+WHERE name_city = 'Москва';
+SELECT * FROM client;
+
+/*  Создать новый заказ для Попова Ильи. Его комментарий для заказа: «Связаться со мной по вопросу доставки». */
+
+INSERT INTO buy (buy_description, client_id)
+SELECT 'Связаться со мной по вопросу доставки', 
+        client_id
+FROM client
+WHERE name_client = 'Попов Илья';
+SELECT * FROM buy;
++--------+---------------------------------------+-----------+
+| buy_id | buy_description                       | client_id |
++--------+---------------------------------------+-----------+
+| 1      | Доставка только вечером               | 1         |
+| 2      | NULL                                  | 3         |
+| 3      | Упаковать каждую книгу по отдельности | 2         |
+| 4      | NULL                                  | 1         |
+| 5      | Связаться со мной по вопросу доставки | 5         |
++--------+---------------------------------------+-----------+
+  
+/* В таблицу buy_book добавить заказ с номером 5. 
+   Этот заказ должен содержать книгу Пастернака «Лирика» в количестве 2 и Булгакова «Белая гвардия» 1 шт.  */
+   
+INSERT INTO buy_book (buy_id, book_id, amount)
+SELECT '5', book_id, '2'
+FROM book
+JOIN author USING(author_id)
+WHERE title = 'Лирика' AND name_author LIKE 'Пастернак%';
+INSERT INTO buy_book (buy_id, book_id, amount)
+SELECT '5', book_id, '1'
+FROM book
+JOIN author USING(author_id)
+WHERE title = 'Белая гвардия' AND name_author LIKE 'Булгаков%';
+SELECT *
+FROM buy_book;
+
+/*  То же самое подзапросами  */
+INSERT INTO buy_book(buy_id, book_id, amount)
+SELECT  '5', (
+SELECT book_id
+FROM book
+WHERE title ='Лирика' AND author_id = (
+SELECT author_id
+FROM author
+WHERE name_author LIKE 'Пас%')), '2'
+FROM book
+WHERE title = 'Лирика';
+SELECT *
+FROM buy_book;
+INSERT INTO buy_book(buy_id, book_id, amount)
+SELECT '5', (
+SELECT book_id
+FROM book
+WHERE title ='Белая гвардия' AND author_id = (
+SELECT author_id
+FROM author
+WHERE name_author LIKE 'Бул%')), '1';
+
+/* Уменьшить количество книг на складе, которые были включены в заказ с номером 5.  */
+UPDATE book b
+    JOIN buy_book bb 
+    USING(book_id)
+    SET b.amount = b.amount - bb.amount
+WHERE bb.buy_id = 5;
+SELECT *
+FROM book;
+
+/* Создать счет (таблицу buy_pay) на оплату заказа с номером 5, 
+   в который включить название книг, их автора, цену, количество заказанных книг и  стоимость.   */
+
+CREATE TABLE buy_pay AS
+SELECT title, name_author, price, bb.amount, bb.amount*b.price Стоимость
+FROM book b
+INNER JOIN author USING(author_id)
+INNER JOIN buy_book bb USING(book_id)
+WHERE buy_id = 5
+ORDER BY 1;
+SELECT * FROM buy_pay;
+     /* Вариант с добавлением поля buy_pay_id  */
+     CREATE TABLE buy_pay (ID INT NOT NULL auto_increment, PRIMARY KEY (ID)) AS 
+	  SELECT title, name_author, ... 
+	  FROM author                   
++---------------+----------------+--------+--------+-----------+
+| title         | name_author    | price  | amount | Стоимость |
++---------------+----------------+--------+--------+-----------+
+| Белая гвардия | Булгаков М.А.  | 540.50 | 1      | 540.50    |
+| Лирика        | Пастернак Б.Л. | 518.99 | 2      | 1037.98   |
++---------------+----------------+--------+--------+-----------+
+
+/* Создать общий счет (таблицу buy_pay) на оплату заказа с номером 5.  */
+
+CREATE TABLE buy_pay AS
+SELECT buy_id, SUM(bb.amount) Количество, SUM(bb.amount*b.price) Итого
+FROM book b
+INNER JOIN buy_book bb USING(book_id)
+WHERE buy_id = 5;
+SELECT * FROM buy_pay;
++--------+------------+---------+
+| buy_id | Количество | Итого   |
++--------+------------+---------+
+| 5      | 3          | 1578.48 |
++--------+------------+---------+
+
+/* В таблицу buy_step для заказа с номером 5 включить все этапы из таблицы step, которые должен пройти этот заказ.
+   В столбцы date_step_beg и date_step_end всех записей занести Null.  */
+
+INSERT INTO buy_step (buy_id, step_id, date_step_beg, date_step_end) 
+SELECT buy_id, step_id, NULL, NULL
+FROM  step s CROSS JOIN buy b
+WHERE buy_id = 5
+;
+SELECT * FROM buy_step;
+
+/* В таблицу buy_step занести дату 12.04.2020 выставления счета на оплату заказа с номером 5.  */
+
+UPDATE buy_step 
+    JOIN step 
+    USING(step_id)
+    SET date_step_beg = '2020.04.12'
+WHERE buy_id = 5 AND name_step LIKE '%Оплата%';
+
+SELECT * FROM buy_step
+WHERE buy_id = 5;
++-------------+--------+---------+---------------+---------------+
+| buy_step_id | buy_id | step_id | date_step_beg | date_step_end |
++-------------+--------+---------+---------------+---------------+
+| 17          | 5      | 1       | 2020-04-12    | NULL          |
+| 18          | 5      | 2       | NULL          | NULL          |
+| 19          | 5      | 3       | NULL          | NULL          |
+| 20          | 5      | 4       | NULL          | NULL          |
++-------------+--------+---------+---------------+---------------+
+
+/* Завершить этап «Оплата» для заказа с номером 5, вставив в столбец date_step_end дату 13.04.2020, 
+    и начать следующий этап («Упаковка»), задав в столбце date_step_beg для этого этапа ту же дату.  */
+
+UPDATE buy_step 
+    JOIN step 
+    USING(step_id)
+    SET date_step_end = '2020.04.13'
+WHERE buy_id = 5 AND name_step LIKE '%Оплата%';
+
+UPDATE buy_step 
+    JOIN step 
+    USING(step_id)
+    SET date_step_beg = '2020.04.13'
+WHERE buy_id = 5 AND step_id =
+        (
+          SELECT step_id + 1 
+          FROM step
+          WHERE name_step LIKE '%Оплата%'
+        );
++-------------+--------+---------+---------------+---------------+
+| buy_step_id | buy_id | step_id | date_step_beg | date_step_end |
++-------------+--------+---------+---------------+---------------+
+| 17          | 5      | 1       | 2020-04-12    | 2020-04-13    |
+| 18          | 5      | 2       | 2020-04-13    | NULL          |
+| 19          | 5      | 3       | NULL          | NULL          |
+| 20          | 5      | 4       | NULL          | NULL          |
++-------------+--------+---------+---------------+---------------+
+ 
+/* Вариант решения со словесным указанием этапа. 
+    Слово 'Оплата' и номер заказа 5 в запросе  при таком подходе указывается лишь один раз.  */  
+
+UPDATE buy_step bs1,
+       buy_step bs2
+SET bs1.date_step_end = '2020-04-13',
+    bs2.date_step_beg = '2020-04-13'
+WHERE bs1.buy_id = 5
+      AND bs2.buy_id = bs1.buy_id
+      AND bs1.step_id = 
+		   (SELECT step_id 
+			FROM step 
+			WHERE name_step = 'Оплата')
+      AND bs2.step_id = bs1.step_id + 1;
+      
+----------   IF    --------      
+UPDATE buy_step
+       JOIN step USING(step_id)
+   SET date_step_end = IF(name_step = 'Оплата', '2020-04-13', date_step_end),
+       date_step_beg = IF(name_step = 'Упаковка', '2020-04-13', date_step_beg)
+ WHERE buy_id = 5
+ 
+UPDATE buy_step
+SET date_step_end = IF(buy_id = 5 AND step_id = 1, '2020-04-13', date_step_end),
+    date_step_beg = IF(buy_id = 5 AND step_id = 2, '2020-04-13', date_step_beg); 
+    
+-----------       ---------
+SET @now_step_id = 
+         (SELECT step_id 
+			FROM step 
+			WHERE name_step = 'Оплата');
+SET @now_date = '2020-04-13';     /*     SELECT CAST( GETDATE() AS Date )   */
+UPDATE buy_step
+SET date_step_end = IF(step_id = @now_step_id, @now_date, date_step_end),
+    date_step_beg = IF(step_id = @now_step_id + 1, @now_date, date_step_beg)
+WHERE buy_id = 5	 ;
+
+/*  Ввести количество заказов, находящихся в каждом из статусов.   */    
+
+SELECT name_step ЭТАП, COUNT(buy_id) ЗАКАЗЫ
+FROM step s
+LEFT JOIN (SELECT * from buy_step  
+WHERE date_step_end IS NULL 
+AND date_step_beg IS NOT NULL) t ON s.step_id = t.step_id
+GROUP BY name_step;
++-----------------+--------+
+| ЭТАП            | ЗАКАЗЫ |
++-----------------+--------+
+| Оплата          | 1      |
+| Упаковка        | 0      |
+| Транспортировка | 1      |
+| Доставка        | 1      |
++-----------------+--------+
+
+/*  случайному клиенту сделать подарок -- книгу  */
+INSERT INTO buy (buy_description, client_id)
+VALUES ("Подарок случайному клиенту" , 
+           (SELECT client_id FROM client
+           ORDER BY RAND()
+           LIMIT 1)
+		 );
+
+/* подарим ему случайнюу книгу */
+INSERT INTO buy_book (buy_id, book_id, amount)
+VALUES (
+    (SELECT buy_id FROM buy WHERE buy_description = 'Подарок случайному клиенту'),
+    (SELECT book_id FROM book
+    ORDER BY RAND()
+    LIMIT 1), /*book*/
+    1
+       );
+
+/* Какую книгу и кому мы подарили?*/
+SELECT b.buy_id, c.name_client, bk.title, a.name_author
+FROM buy b
+    JOIN client c USING (client_id)
+    JOIN buy_book bb USING (buy_id)
+    JOIN bk ON bk.book_id = bb.book_id
+    JOIN author a USING (author_id)
+ 
+WHERE buy.buy_description = 'Подарок случайному клиенту';       
+	 	       
+/* Необходимо узнать на каком сейчас этапе все незавершённые заказы.  */    
+
+SELECT name_client, title, date_step_beg, name_step
+FROM buy_step
+INNER JOIN step USING (step_id)
+INNER JOIN buy USING (buy_id)
+INNER JOIN client USING (client_id)
+INNER JOIN buy_book USING (buy_id)
+INNER JOIN book USING (book_id)
+WHERE date_step_end IS NULL AND date_step_beg IS NOT NULL;
++----------------+--------------------+---------------+-----------------+
+| name_client    | title              | date_step_beg | name_step       |
++----------------+--------------------+---------------+-----------------+
+| Семенонов Иван | Лирика             | 2020-03-02    | Транспортировка |
+| Абрамова Катя  | Идиот              | 2020-03-12    | Доставка        |
+| Абрамова Катя  | Белая гвардия      | 2020-03-12    | Доставка        |
+| Абрамова Катя  | Мастер и Маргарита | 2020-03-12    | Доставка        |
+| Баранов Павел  | Игрок              | 2020-03-20    | Оплата          |
++----------------+--------------------+---------------+-----------------+
+
+/* Перевернуть строчку  */
+SELECT REVERSE(name_author) FROM author
+
+/*Обновить информацию о приблизительном времени траноспортировки в разные города на основании данных за 2020 год. 
+Если данных для города нет, оставить текущее значение.*/
+
+UPDATE city
+       INNER JOIN (SELECT name_city,
+                          ROUND(AVG(DATEDIFF(date_step_end, date_step_beg))) AS mean_days
+                     FROM step
+                          INNER JOIN buy_step USING (step_id)
+                          INNER JOIN buy USING (buy_id)
+                          INNER JOIN client USING (client_id)
+                          INNER JOIN city USING (city_id)
+                    WHERE name_step = 'Транспортировка'
+                          AND date_step_end IS NOT null
+                    GROUP BY name_city
+                   ) AS mean_delivery USING (name_city)
+   SET days_delivery = IF(mean_days IS NOT null,
+                          mean_days,
+                          days_delivery
+                         );
+                    
+SELECT * FROM city;
++---------+-----------------+---------------+
+| city_id | name_city       | days_delivery |
++---------+-----------------+---------------+
+| 1       | Москва          | 5             |
+| 2       | Санкт-Петербург | 3             |
+| 3       | Владивосток     | 14            |
++---------+-----------------+---------------+
+
+/* Абрамова Катя переезжает в Санкт-Петербург.  */
+
+UPDATE CLIENT SET city_id = (
+SELECT city_id
+FROM city
+WHERE name_city = 'Санкт-Петербург'
+)
+WHERE name_client = 'Абрамова Катя'; 
+
+/* 1. Исправить фамилии клиентов, которые заказывали Булгакова, так что если заказал Иванов, его фамилия отразилась бы как Бул-Иванов.
+   2. В таблицу genre добавить новый жанр - "Экстремизм". 
+   3. Везде, где автор "Булгаков"  поменять жанр на "Экстремизм" и поднять цену в 10 раз из-за возросшего спроса  */
+
+UPDATE CLIENT
+   SET name_client = CONCAT('Бул-', name_client)
+ WHERE client_id IN (SELECT client_id
+                    FROM buy
+                         INNER JOIN buy_book USING (buy_id)
+                         INNER JOIN book USING (book_id)
+                    WHERE author_id = 1
+                    );
+
+INSERT INTO genre (name_genre)
+VALUES ('Экстремизм');
+
+UPDATE book
+   SET genre_id = 4, price = 10*price
+ WHERE author_id = 1;
+
+SELECT book.title, author.name_author, genre.name_genre, book.price 
+  FROM book
+       INNER JOIN author USING (author_id)
+       INNER JOIN genre USING (genre_id);   
+
+==============================================================================================
+
+CREATE TABLE subject (
+    subject_id INT PRIMARY KEY AUTO_INCREMENT,
+    name_subject varchar(30)
+);
+
+INSERT INTO subject (subject_id,name_subject) VALUES 
+    (1,'Основы SQL'),
+    (2,'Основы баз данных'),
+    (3,'Физика');
+
+CREATE TABLE student (
+    student_id INT PRIMARY KEY AUTO_INCREMENT,
+    name_student varchar(50)
+);
+
+INSERT INTO student (student_id,name_student) VALUES
+    (1,'Баранов Павел'),
+    (2,'Абрамова Катя'),
+    (3,'Семенов Иван'),
+    (4,'Яковлева Галина');
+
+CREATE TABLE attempt (
+    attempt_id INT PRIMARY KEY AUTO_INCREMENT,
+    student_id INT,
+    subject_id INT,
+    date_attempt date,
+    result INT,
+    FOREIGN KEY (student_id) REFERENCES student (student_id) ON DELETE CASCADE,
+    FOREIGN KEY (subject_id) REFERENCES subject (subject_id) ON DELETE CASCADE
+);
+
+INSERT INTO attempt (attempt_id,student_id,subject_id,date_attempt,result) VALUES
+    (1,1,2,'2020-03-23',67),
+    (2,3,1,'2020-03-23',100),
+    (3,4,2,'2020-03-26',0),
+    (4,1,1,'2020-04-15',33),
+    (5,3,1,'2020-04-15',67),
+    (6,4,2,'2020-04-21',100),
+    (7,3,1,'2020-05-17',33);
+
+CREATE TABLE question (
+    question_id INT PRIMARY KEY AUTO_INCREMENT,
+    name_question varchar(100), 
+    subject_id INT,
+    FOREIGN KEY (subject_id) REFERENCES subject (subject_id) ON DELETE CASCADE
+);
+
+INSERT INTO question (question_id,name_question,subject_id) VALUES
+    (1,'Запрос на выборку начинается с ключевого слова:',1),
+    (2,'Условие, по которому отбираются записи, задается после ключевого слова:',1),
+    (3,'Для сортировки используется:',1),
+    (4,'Какой запрос выбирает все записи из таблицы student:',1),
+    (5,'Для внутреннего соединения таблиц используется оператор:',1),
+    (6,'База данных - это:',2),
+    (7,'Отношение - это:',2),
+    (8,'Концептуальная модель используется для',2),
+    (9,'Какой тип данных не допустим в реляционной таблице?',2);
+
+CREATE TABLE answer (
+    answer_id INT PRIMARY KEY AUTO_INCREMENT,
+    name_answer varchar(100),
+    question_id INT,
+    is_correct BOOLEAN,
+    CONSTRAINT answer_ibfk_1 FOREIGN KEY (question_id) REFERENCES question (question_id) ON DELETE CASCADE
+);
+
+INSERT INTO answer (answer_id,name_answer,question_id,is_correct) VALUES
+    (1,'UPDATE',1,FALSE),
+    (2,'SELECT',1,TRUE),
+    (3,'INSERT',1,FALSE),
+    (4,'GROUP BY',2,FALSE),
+    (5,'FROM',2,FALSE),
+    (6,'WHERE',2,TRUE),
+    (7,'SELECT',2,FALSE),
+    (8,'SORT',3,FALSE),
+    (9,'ORDER BY',3,TRUE),
+    (10,'RANG BY',3,FALSE),
+    (11,'SELECT * FROM student',4,TRUE),
+    (12,'SELECT student',4,FALSE),
+    (13,'INNER JOIN',5,TRUE),
+    (14,'LEFT JOIN',5,FALSE),
+    (15,'RIGHT JOIN',5,FALSE),
+    (16,'CROSS JOIN',5,FALSE),
+    (17,'совокупность данных, организованных по определенным правилам',6,TRUE),
+    (18,'совокупность программ для хранения и обработки больших массивов информации',6,FALSE),
+    (19,'строка',7,FALSE),
+    (20,'столбец',7,FALSE),
+    (21,'таблица',7,TRUE),
+    (22,'обобщенное представление пользователей о данных',8,TRUE),
+    (23,'описание представления данных в памяти компьютера',8,FALSE),
+    (24,'база данных',8,FALSE),
+    (25,'file',9,TRUE),
+    (26,'INT',9,FALSE),
+    (27,'VARCHAR',9,FALSE),
+    (28,'DATE',9,FALSE);
+
+CREATE TABLE testing (
+    testing_id INT PRIMARY KEY AUTO_INCREMENT,
+    attempt_id INT,
+    question_id INT,
+    answer_id INT,
+    FOREIGN KEY (attempt_id) REFERENCES attempt (attempt_id) ON DELETE CASCADE
+);
+
+INSERT INTO testing (testing_id,attempt_id,question_id,answer_id) VALUES
+    (1,1,9,25),
+    (2,1,7,19),
+    (3,1,6,17),
+    (4,2,3,9),
+    (5,2,1,2),
+    (6,2,4,11),
+    (7,3,6,18),
+    (8,3,8,24),
+    (9,3,9,28),
+    (10,4,1,2),
+    (11,4,5,16),
+    (12,4,3,10),
+    (13,5,2,6),
+    (14,5,1,2),
+    (15,5,4,12),
+    (16,6,6,17),
+    (17,6,8,22),
+    (18,6,7,21),
+    (19,7,1,3),
+    (20,7,4,11),
+    (21,7,5,16);
+    
+/* Вывести студентов, которые сдавали дисциплину «Основы баз данных», указать дату попытки и результат  */
+
+SELECT name_student, date_attempt, result
+FROM attempt
+INNER JOIN student USING(student_id)
+INNER JOIN subject USING(subject_id)
+WHERE name_subject LIKE '%Основы баз данных%'
+ORDER BY 3 DESC;    
+
+/* Вывести, сколько попыток сделали студенты по каждой дисциплине, 
+   а также средний результат попыток, который округлить до 2 знаков после запятой.  */
+SELECT name_subject,
+       COUNT(attempt_id) Количество,
+       IF(ROUND(AVG(result), 2) IS NOT NULL, ROUND(AVG(result), 2), 0)  Среднее
+FROM attempt
+RIGHT JOIN subject USING(subject_id)
+GROUP BY name_subject
+ORDER BY 3 DESC;
++-------------------+------------+---------+
+| name_subject      | Количество | Среднее |
++-------------------+------------+---------+
+| Основы SQL        | 4          | 58.25   |
+| Основы баз данных | 3          | 55.67   |
+| Физика            | 0          | 0       |
++-------------------+------------+---------+
+
+/* Вывести студентов (различных студентов), имеющих максимальные результаты попыток   */
+
+SELECT name_student, result
+FROM student
+  INNER JOIN attempt USING(student_id)
+  WHERE result = 
+        (SELECT MAX(result)
+        FROM attempt
+        )
+ORDER BY 1; 
+-------       var 2 ------
+SELECT DISTINCT name_student, result
+FROM 
+    student
+    JOIN attempt USING (student_id)
+WHERE result >= ALL (SELECT result FROM attempt)
+ORDER BY name_student;
+
+/* Посчитать разницу между попытками сдачи по 1 предмету  */
++-----------------+-------------------+----------+
+| name_student    | name_subject      | Интервал |
++-----------------+-------------------+----------+
+| Яковлева Галина | Основы баз данных | 26       |
+| Семенов Иван    | Основы SQL        | 55       |
++-----------------+-------------------+----------+
+SELECT name_student, 
+       name_subject,
+       DATEDIFF(MAX(date_attempt), MIN(date_attempt)) Интервал
+FROM attempt INNER JOIN subject USING(subject_id)
+             INNER JOIN student USING(student_id)
+GROUP BY  name_subject, name_student
+HAVING COUNT(name_student) > 1 
+ORDER BY 3 ASC;
+
+/* Вывести дисциплину и количество уникальных студентов (столбец Количество), которые по ней проходили тестирование   */
++-------------------+------------+
+| name_subject      | Количество |
++-------------------+------------+
+| Основы SQL        | 2          |
+| Основы баз данных | 2          |
+| Физика            | 0          |
++-------------------+------------+
+SELECT name_subject,
+       COUNT(DISTINCT student_id) Количество
+FROM attempt RIGHT JOIN subject USING(subject_id)      
+GROUP BY  name_subject     
+ORDER BY 2 DESC, 1;  
+
+/* Случайным образом отберите 3 вопроса по дисциплине «Основы баз данных»  */ 
++-------------+-----------------------------------------------------+
+| question_id | name_question                                       |
++-------------+-----------------------------------------------------+
+| 9           | Какой тип данных не допустим в реляционной таблице? |
+| 8           | Концептуальная модель используется для              |
+| 6           | База данных - это:                                  |
++-------------+-----------------------------------------------------+  
+SELECT question_id,
+       name_question 
+FROM subject 
+     JOIN question USING(subject_id)
+WHERE name_subject LIKE '%Основы баз данных%'     
+ORDER BY RAND()
+LIMIT 3;
+
+/* Вывести вопросы, которые были включены в тест для Семенова Ивана (attempt_id для этой попытки равно 7). 
+   Указать, какой ответ дал студент и правильный он или нет (вывести Верно или Неверно) */
+   
+SELECT name_question, 
+       name_answer, 
+		 IF(is_correct = 1, 'Верно', 'Неверно') Результат 
+FROM testing t
+     JOIN answer a USING(answer_id) 
+	  JOIN question q ON t.question_id = q.question_id  
+WHERE attempt_id = 7;
+
+/* Посчитать результаты тестирования в процентах (3 попытки)  */
++-----------------+-------------------+--------------+-----------+
+| name_student    | name_subject      | date_attempt | Результат |
++-----------------+-------------------+--------------+-----------+
+| Баранов Павел   | Основы SQL        | 2020-04-15   | 33.33     |
+| Баранов Павел   | Основы баз данных | 2020-03-23   | 66.67     |
+| Семенов Иван    | Основы SQL        | 2020-05-17   | 33.33     |
+| Семенов Иван    | Основы SQL        | 2020-04-15   | 66.67     |
+| Семенов Иван    | Основы SQL        | 2020-03-23   | 100.00    |
+| Яковлева Галина | Основы баз данных | 2020-04-21   | 100.00    |
+| Яковлева Галина | Основы баз данных | 2020-03-26   | 0.00      |
++-----------------+-------------------+--------------+-----------+
+SELECT name_student, 
+       name_subject, 
+		 date_attempt, 
+       ROUND((SUM(is_correct)/3*100), 2) Результат
+FROM attempt
+     JOIN student USING(student_id) 
+	  JOIN subject USING(subject_id)	  
+	  JOIN testing USING(attempt_id)
+	  JOIN answer USING(answer_id)
+GROUP BY attempt_id
+ORDER BY 1, 3 DESC;
+
+/* Для каждого вопроса вывести процент успешных решений, 
+   то есть отношение количества верных ответов к общему количеству ответов   */   
++-------------------+-----------------------------------+---------------+------------+
+| name_subject      | Вопрос                            | Всего_ответов | Успешность |
++-------------------+-----------------------------------+---------------+------------+
+| Основы SQL        | Условие, по которому отбираютс... | 1             | 100.00     |
+| Основы SQL        | Запрос на выборку начинается с... | 4             | 75.00      |
+| Основы SQL        | Какой запрос выбирает все запи... | 3             | 66.67      |
+| Основы SQL        | Для сортировки используется:...   | 2             | 50.00      |
+| Основы SQL        | Для внутреннего соединения таб... | 2             | 0.00       |
+| Основы баз данных | База данных - это:...             | 3             | 66.67      |
+| Основы баз данных | Какой тип данных не допустим в... | 2             | 50.00      |
+| Основы баз данных | Концептуальная модель использу... | 2             | 50.00      |
+| Основы баз данных | Отношение - это:...               | 2             | 50.00      |
++-------------------+-----------------------------------+---------------+------------+
+SELECT name_subject, 
+       CONCAT(LEFT(name_question, 30),'...') Вопрос, 
+	    COUNT(answer_id) Всего_ответов,
+		 ROUND(100*AVG(is_correct), 2) AS Успешность 
+/*	    ROUND(SUM(is_correct)/COUNT(is_correct)*100, 2) Успешность    */ 
+    FROM subject 	  
+	 JOIN question q USING(subject_id)
+	 LEFT JOIN answer a ON q.question_id = a.question_id
+	 JOIN testing USING(answer_id)
+GROUP BY q.question_id
+ORDER BY 1, 4 DESC, 2;
+ 
+/*   */ 
++-----------------+-------------------+-----------+
+| Студент         | Предмет           | Результат |
++-----------------+-------------------+-----------+
+| Абрамова Катя   | NULL              | Пересдача |
+| Баранов Павел   | Основы SQL        | Пересдача |
+| Баранов Павел   | Основы баз данных | Зачет     |
+| Семенов Иван    | Основы SQL        | Зачет     |
+| Яковлева Галина | Основы баз данных | Зачет     |
++-----------------+-------------------+-----------+ 
+SELECT name_student Студент,
+       name_subject Предмет,
+       IF(AVG(is_correct) < 0.5 
+	 OR AVG(is_correct) IS NULL, 'Пересдача', 'Зачет') Результат	 
+  FROM student
+  LEFT JOIN attempt USING(student_id) 
+  LEFT JOIN testing USING(attempt_id)
+  LEFT JOIN answer  USING(answer_id)
+  LEFT JOIN subject USING(subject_id)
+ GROUP BY   name_student, name_subject
+ ORDER BY 1, 2;
+
+/*         */ 
++-----------------+----------------------------------+
+| Студент         | Решение_Ректората                |
++-----------------+----------------------------------+
+| Абрамова Катя   | Отчислить за неуспеваемость      |
+| Семенов Иван    | Повысить стипендию на 100 рублей |
+| Яковлева Галина | Повысить стипендию на 100 рублей | Баранов Павел  - Отчислить тоже   НЕПРАВИЛЬНО!
++-----------------+----------------------------------+ 
+SELECT DISTINCT(name_student), 'Отчислить за неуспеваемость' Решение_Ректората
+  FROM student
+ WHERE name_student NOT IN 
+       (SELECT DISTINCT(name_student) Студент 
+         FROM attempt
+         INNER JOIN student USING(student_id)
+         WHERE result = 100
+       )
+ UNION ALL
+SELECT DISTINCT(name_student) Студент, 'Повысить стипендию на 100 рублей' Решение_Ректората 
+  FROM attempt
+ INNER JOIN student USING(student_id)
+ WHERE result = 100;
+ 
+ /*  Правильное решение  */
+ SELECT name_student AS Студент, 
+        IF(MAX(result)<50 OR MAX(result) IS NULL, 'Студент отчислен', 
+		  IF(MAX(result)=100,'Повысить стипендию на 100 рублей','Студент остается учиться')) Решение_Ректората  
+FROM (
+SELECT name_student, name_subject, attempt_id, result
+ FROM student
+      LEFT JOIN attempt USING (student_id)
+      LEFT JOIN subject USING (subject_id)
+		) AS q
+WHERE name_subject = 'Основы SQL' 
+   OR name_subject = 'Основы баз данных' 
+	OR name_subject IS NULL
+GROUP BY Студент
+HAVING Решение_Ректората <> 'Студент остается учиться';
+
+/*    Еще короче решение    */
++-----------------+----------------------------------+
+| Студент         | Решение_Ректората                |
++-----------------+----------------------------------+
+| Абрамова Катя   | Отчислить за неуспеваемость      |
+| Семенов Иван    | Повысить стипендию на 100 рублей |
+| Яковлева Галина | Повысить стипендию на 100 рублей | 
++-----------------+----------------------------------+
+SELECT name_student, 
+       IF(MIN(subject_id) IN (1, 2), 
+       IF(MAX(result) = 100, "Дать 100 рублей", 
+		 IF(MAX(result) < 50, "Отчислить", "Прошел")), "Отчислить") Решение_Ректората
+FROM student
+LEFT JOIN attempt USING(student_id)
+LEFT JOIN subject USING(subject_id)
+GROUP BY name_student
+HAVING Решение_Ректората <> 'Прошел';
+================================================================== 
+/*   Тоже неплохо                                                */
+SELECT name_student AS Студент, 
+       IF(result IS NULL, "Отчислить за неуспеваемость", "Повысить стипендию на 100 рублей") Решение_Ректората
+  FROM student
+  LEFT JOIN attempt USING (student_id)
+  LEFT JOIN subject USING (subject_id)
+ WHERE name_subject IN ("Основы баз данных", "Основы SQL") AND result = 100 
+       OR name_subject IS NULL AND result IS NULL;
+       
+       
+/* В таблицу attempt включить новую попытку для студента Баранова Павла по дисциплине «Основы баз данных». 
+   Установить текущую дату в качестве даты выполнения попытки.  */
++------------+------------+------------+--------------+--------+
+| attempt_id | student_id | subject_id | date_attempt | result |
++------------+------------+------------+--------------+--------+
+| 1          | 1          | 2          | 2020-03-23   | 67     |
+| 2          | 3          | 1          | 2020-03-23   | 100    |
+| 3          | 4          | 2          | 2020-03-26   | 0      |
+| 4          | 1          | 1          | 2020-04-15   | 33     |
+| 5          | 3          | 1          | 2020-04-15   | 67     |
+| 6          | 4          | 2          | 2020-04-21   | 100    |
+| 7          | 3          | 1          | 2020-05-17   | 33     |
+| 8          | 1          | 2          | 2022-07-29   | NULL   |
++------------+------------+------------+--------------+--------+
+   
+INSERT INTO attempt (student_id, subject_id, date_attempt, result)
+SELECT student_id, subject_id,  NOW(), NULL                    
+  FROM student
+       LEFT JOIN attempt USING (student_id)
+       LEFT JOIN subject USING (subject_id)
+ WHERE name_student LIKE '%Баранов%'  AND name_subject  LIKE '%Основы баз данных%'; 
+SELECT * FROM attempt; 
+
+/* Стереть строчки с id> 24  */
+DELETE FROM testing WHERE testing_id > 21;
+
+/*  Случайным образом выбрать три вопроса (запрос) по дисциплине, тестирование по которой собирается проходить студент, 
+    занесенный в таблицу attempt последним, и добавить их в таблицу testing  */
+
+INSERT testing (attempt_id, question_id)
+SELECT attempt_id, question_id
+  FROM question q
+       LEFT JOIN attempt USING (subject_id)
+ WHERE attempt_id = (SELECT MAX(attempt_id)
+                     FROM attempt)
+ ORDER BY RAND()
+ LIMIT 3;
+ SELECT * FROM testing;
+
+/* Студент прошел тестирование (то есть все его ответы занесены в таблицу testing), 
+   далее необходимо вычислить результат(запрос) и занести его в таблицу attempt для attempt_id = 8.   */    
++------------+------------+------------+--------------+--------+
+| attempt_id | student_id | subject_id | date_attempt | result |
++------------+------------+------------+--------------+--------+
+| 1          | 1          | 2          | 2020-03-23   | 67     |
+| 2          | 3          | 1          | 2020-03-23   | 100    |
+| 3          | 4          | 2          | 2020-03-26   | 0      |
+| 4          | 1          | 1          | 2020-04-15   | 33     |
+| 5          | 3          | 1          | 2020-04-15   | 67     |
+| 6          | 4          | 2          | 2020-04-21   | 100    |
+| 7          | 3          | 1          | 2020-05-17   | 33     |
+| 8          | 1          | 2          | 2020-06-12   | 67     |
++------------+------------+------------+--------------+--------+
+UPDATE attempt
+   SET result = (SELECT ROUND(SUM(is_correct)/3*100, 0)
+                   FROM answer 
+                        JOIN testing USING(answer_id)
+                  WHERE attempt_id = 8)
+ WHERE attempt_id = 8;
+SELECT * FROM attempt;
+ 
+/*  Удалить из таблицы attempt все попытки, выполненные до 1 мая 2020 года. 
+    Также удалить и все соотв этим попыткам вопросы из таблицы testing, которая создавалась следующим запросом:
+	 FOREIGN KEY (attempt_id)  REFERENCES attempt (attempt_id) ON DELETE CASCADE   */
+	 
+DELETE FROM attempt WHERE date_attempt < '2020-05-01';	 
+
+/*  Создать таблицу grade в которую добавить фамилию и имя студентов, имя предмета, дату попытки сдачи, 
+    результат и столбец name_grade в которому указать 'Неудовлетворительно', если результат меньше 60, 
+    'Удовлетворительно' если результат больше 60 и 'Отлично' если результат равен 100.  */
+    
+CREATE TABLE grade AS
+       (SELECT name_student,
+               name_subject,
+               date_attempt,
+               result,
+               IF(result = 100, "Отлично", (IF(result > 60, "Удовлетворительно", "Неудовлетворительно"))) name_grade
+  FROM student
+       JOIN attempt USING (student_id)
+       JOIN subject USING (subject_id)
+       );
+
+/* Удалить из таблицы attempt попытки с оценкой 'Неудовлетворительно' (использовать столбец name_grade)   */	      
+DELETE FROM attempt 
+ WHERE result = ANY (SELECT result 
+                       FROM grade 
+							 WHERE name_grade = 'Неудовлетворительно'
+							);
+
+/*  DATE_ADD(NOW(), interval -10 DAY) # вернет дату, которая была 10 дней назад  */	
+
+=================================================================================================================
+
+START TRANSACTION ;
+DROP TABLE IF EXISTS enrollee_subject;
+DROP TABLE IF EXISTS program_enrollee;
+DROP TABLE IF EXISTS program_subject;
+DROP TABLE IF EXISTS enrollee_achievement;
+DROP TABLE IF EXISTS achievement;
+DROP TABLE IF EXISTS enrollee;
+DROP TABLE IF EXISTS program;
+DROP TABLE IF EXISTS subject;
+DROP TABLE IF EXISTS department;
+COMMIT ;
+START TRANSACTION ;
+CREATE TABLE department (
+    `department_id` INT PRIMARY KEY AUTO_INCREMENT,
+    `name_department` VARCHAR(30)
+);
+INSERT INTO department (`department_id`, `name_department`)
+VALUES (1, 'Инженерная школа'), (2, 'Школа естественных наук');
+
+CREATE TABLE subject (
+    `subject_id` INT PRIMARY KEY AUTO_INCREMENT,
+    `name_subject` VARCHAR(30)
+);
+INSERT INTO subject (`subject_id`, `name_subject`)
+VALUES (1, 'Русский язык'), (2, 'Математика'), (3, 'Физика'), (4, 'Информатика');
+
+CREATE TABLE program (
+    `program_id` INT PRIMARY KEY AUTO_INCREMENT,
+    `name_program` VARCHAR(50),
+    `department_id` INT,
+    `plan` INT,
+    FOREIGN KEY (`department_id`) REFERENCES `department`(`department_id`) ON DELETE CASCADE
+);
+INSERT INTO program (`program_id`, `name_program`, `department_id`, `plan`)
+VALUES (1, 'Прикладная математика и информатика', 2, 2),
+(2, 'Математика и компьютерные науки', 2, 1),
+(3, 'Прикладная механика', 1, 2),
+(4, 'Мехатроника и робототехника', 1, 3);
+
+CREATE TABLE enrollee (
+    `enrollee_id` INT PRIMARY KEY AUTO_INCREMENT,
+    `name_enrollee` VARCHAR(50)
+);
+INSERT INTO enrollee (`enrollee_id`, `name_enrollee`)
+VALUES (1, 'Баранов Павел'), (2, 'Абрамова Катя'), (3, 'Семенов Иван'),
+(4, 'Яковлева Галина'), (5, 'Попов Илья'), (6, 'Степанова Дарья');
+
+CREATE TABLE achievement (
+    `achievement_id` INT PRIMARY KEY AUTO_INCREMENT,
+    `name_achievement` VARCHAR(30),
+    `bonus` INT
+);
+INSERT INTO achievement (`achievement_id`, `name_achievement`, `bonus`)
+VALUES (1, 'Золотая медаль', 5), (2, 'Серебряная медаль', 3),
+    (3, 'Золотой значок ГТО', 3),(4, 'Серебряный значок ГТО', 1);
+
+CREATE TABLE enrollee_achievement (
+    `enrollee_achiev_id` INT PRIMARY KEY AUTO_INCREMENT,
+    `enrollee_id` INT,
+    `achievement_id` INT,
+    FOREIGN KEY (`enrollee_id`) REFERENCES `enrollee`(`enrollee_id`) ON DELETE CASCADE,
+    FOREIGN KEY (`achievement_id`) REFERENCES `achievement`(`achievement_id`) ON DELETE CASCADE
+);
+INSERT INTO enrollee_achievement (`enrollee_achiev_id`, `enrollee_id`, `achievement_id`)
+VALUES (1, 1, 2), (2, 1, 3), (3, 3, 1), (4, 4, 4), (5, 5, 1),(6, 5, 3);
+
+CREATE TABLE program_subject (
+    `program_subject_id` INT PRIMARY KEY AUTO_INCREMENT,
+    `program_id` INT,
+    `subject_id` INT,
+    `min_result` INT,
+    FOREIGN KEY (`program_id`) REFERENCES `program`(`program_id`)  ON DELETE CASCADE,
+    FOREIGN KEY (`subject_id`) REFERENCES `subject`(`subject_id`) ON DELETE CASCADE
+);
+INSERT INTO program_subject (`program_subject_id`, `program_id`, `subject_id`, `min_result`)
+VALUES (1, 1, 1, 40),(2, 1, 2, 50), (3, 1, 4, 60), (4, 2, 1, 30),
+       (5, 2, 2, 50),(6, 2, 4, 60), (7, 3, 1, 30),(8, 3, 2, 45),
+       (9, 3, 3, 45),(10, 4, 1, 40), (11, 4, 2, 45), (12, 4, 3, 45);
+
+CREATE TABLE program_enrollee (
+    `program_enrollee_id` INT PRIMARY KEY AUTO_INCREMENT,
+    `program_id` INT,
+    `enrollee_id` INT,
+    FOREIGN KEY (`program_id`) REFERENCES `program`(`program_id`) ON DELETE CASCADE,
+    FOREIGN KEY (`enrollee_id`) REFERENCES enrollee(`enrollee_id`) ON DELETE CASCADE
+);
+INSERT INTO program_enrollee (`program_enrollee_id`, `program_id`, `enrollee_id`)
+VALUES (1, 3, 1), (2, 4, 1), (3, 1, 1), (4, 2, 2), (5, 1, 2),
+       (6, 1, 3), (7, 2, 3), (8, 4, 3), (9, 3, 4), (10, 3, 5),
+       (11, 4, 5), (12, 2, 6), (13, 3, 6), (14, 4, 6);
+
+CREATE TABLE enrollee_subject (
+    `enrollee_subject_id` INT PRIMARY KEY AUTO_INCREMENT,
+    `enrollee_id` INT,
+    `subject_id` INT,
+    `result` INT,
+    FOREIGN KEY (`enrollee_id`) REFERENCES `enrollee`(`enrollee_id`) ON DELETE CASCADE,
+    FOREIGN KEY (`subject_id`) REFERENCES `subject`(`subject_id`) ON DELETE CASCADE
+);
+INSERT INTO enrollee_subject (`enrollee_subject_id`, `enrollee_id`, `subject_id`, `result`)
+VALUES (1, 1, 1, 68), (2, 1, 2, 70), (3, 1, 3, 41), (4, 1, 4, 75), (5, 2, 1, 75), (6, 2, 2, 70),
+       (7, 2, 4, 81), (8, 3, 1, 85), (9, 3, 2, 67), (10, 3, 3, 90), (11, 3, 4, 78), (12, 4, 1, 82),
+       (13, 4, 2, 86), (14, 4, 3, 70), (15, 5, 1, 65), (16, 5, 2, 67), (17, 5, 3, 60),
+       (18, 6, 1, 90), (19, 6, 2, 92), (20, 6, 3, 88), (21, 6, 4, 94);
+COMMIT ;
+
+/* Вывести абитуриентов, которые хотят поступать на образовательную программу 
+   «Мехатроника и робототехника» в отсортированном по фамилиям виде.   */
+SELECT name_enrollee 
+  FROM program_enrollee
+       JOIN enrollee USING(enrollee_id) 
+       JOIN program USING(program_id)
+ WHERE name_program LIKE '%Мехатроника и робототехника%'
+ ORDER BY name_enrollee;
+       
+/* Вывести образовательные программы, на которые для поступления необходим предмет «Информатика».  */  
+SELECT name_program
+  FROM program_subject
+       JOIN subject USING(subject_id) 
+       JOIN program USING(program_id)
+ WHERE name_subject LIKE '%Информатика%'
+ ORDER BY name_program DESC; 
+ 
+ /*  Выведите количество абитуриентов, сдавших ЕГЭ по каждому предмету, 
+     максимальное, минимальное и среднее значение баллов по предмету ЕГЭ. 
+     Вычисляемые столбцы назвать Количество, Максимум, Минимум, Среднее.   */    
+SELECT name_subject,
+       COUNT(enrollee_id)    Количество,
+       MAX(result)           Максимум,
+		 MIN(result)           Минимум,
+		 ROUND(AVG(result), 1) Среднее 
+  FROM subject
+       JOIN enrollee_subject USING(subject_id)
+ GROUP BY name_subject      
+ ORDER BY name_subject;        
+		     
+/*  Вывести образовательные программы, 
+    для которых минимальный балл ЕГЭ по каждому предмету больше или равен 40 баллам.  */
+    
+SELECT name_program
+  FROM program_subject
+       JOIN program USING(program_id)      
+ GROUP BY name_program
+HAVING MIN(min_result) >= 40     
+ ORDER BY name_program;
+ 
+/*  Вывести образовательные программы, которые имеют самый большой план набора,  вместе с этой величиной.  */
+SELECT name_program,
+       plan
+  FROM program 
+ WHERE plan = (SELECT MAX(plan)
+                FROM program
+              );
+
+/* Посчитать, сколько доп. баллов получит каждый абитуриент. Столбец с дополнительными баллами назвать Бонус.   */
+SELECT name_enrollee,
+      SUM(bonus) Бонус
+  FROM enrollee_achievement
+      LEFT JOIN achievement USING(achievement_id)
+      LEFT JOIN enrollee USING(enrollee_id)
+GROUP BY name_enrollee
+
+SELECT name_enrollee,
+      /* IF(SUM(bonus) IS NULL, 0, SUM(bonus)) Бонус --NULL is FALSE, поэтому можно так: */
+		 IF(SUM(bonus), SUM(bonus), 0)
+		 /*Или так, с IFNULL:  IFNULL(SUM(bonus), 0)   или так:  COALESCE(SUM(bonus), 0) */ 
+  FROM enrollee_achievement
+       JOIN achievement    USING(achievement_id)
+       RIGHT JOIN enrollee USING(enrollee_id)
+ GROUP BY name_enrollee 
+ ORDER BY name_enrollee;    
+
+=====================================================================
+Если у нас несколько таблиц и надо сделать LEFT JOIN, то его нужно делать всем таблицам справа от нужной,  
+или присоединить нужную таблицу последней с помощью RIGHT JOIN.
+=====================================================================
+/*  Выведите сколько человек подало заявление на каждую образовательную программу и конкурс на нее 
+   (число поданных заявлений деленное на количество мест по плану), округленный до 2-х знаков после запятой  */
+SELECT name_department, 
+       name_program, 
+		 plan, 
+		 COUNT(enrollee_id) Количество, 
+		 ROUND(COUNT(enrollee_id)  / plan, 2) Конкурс
+  FROM program
+       JOIN department USING(department_id)
+       JOIN program_enrollee USING(program_id)
+ GROUP BY name_department, name_program    
+
+/* Вывести образовательные программы, на которые для поступления необходимы предмет «Информатика» и «Математика» 
+   в отсортированном по названию программ виде.      */
++-------------------------------------+
+| name_program                        |
++-------------------------------------+
+| Математика и компьютерные науки     |
+| Прикладная математика и информатика |
++-------------------------------------+
+SELECT name_program
+  FROM program
+       JOIN department USING(department_id)
+       JOIN program_subject USING(program_id)
+       JOIN subject USING(subject_id)
+ WHERE name_subject IN('Информатика', 'Математика')
+ GROUP BY name_program 
+HAVING COUNT(subject_id) = 2
+ ORDER BY 1;
+       
+/* Посчитать количество баллов каждого абитуриента на каждую образовательную программу, на которую он подал 
+   заявление, по результатам ЕГЭ. В результат включить название образовательной программы, фамилию и имя 
+	  абитуриента, а также столбец с суммой баллов, который назвать itog.  */       
+SELECT name_program, 
+       name_enrollee, 
+       SUM(result) itog
+  FROM enrollee e
+       JOIN program_enrollee pe USING(enrollee_id)
+       JOIN program             USING(program_id)
+       JOIN program_subject     USING(program_id)
+       JOIN subject s           USING(subject_id)
+       JOIN enrollee_subject es ON s.subject_id = es.subject_id 
+                                AND es.enrollee_id = e.enrollee_id
+ GROUP BY name_program, 
+       name_enrollee	
+ ORDER BY 1, 3 DESC; 
+ 
+ /* Вывести название образовательной программы и фамилию тех абитуриентов, которые подавали документы на эту
+     образовательную программу, но не могут быть зачислены на нее. Например, Баранов Павел по «Физике» набрал
+	 41 балл, а для обр программы «Прикладная механика» мин балл по этому предмету определен в 45 баллов.    */
++-----------------------------+---------------+
+| name_program                | name_enrollee |
++-----------------------------+---------------+
+| Мехатроника и робототехника | Баранов Павел |
+| Прикладная механика         | Баранов Павел |
++-----------------------------+---------------+
+SELECT name_program, 
+       name_enrollee
+  FROM enrollee e
+       JOIN program_enrollee pe USING(enrollee_id)
+       JOIN program             USING(program_id)
+       JOIN program_subject     USING(program_id)
+       JOIN subject s           USING(subject_id)
+       JOIN enrollee_subject es ON s.subject_id = es.subject_id 
+                                AND es.enrollee_id = e.enrollee_id
+ WHERE result < min_result                               
+ GROUP BY name_program, 
+       name_enrollee	
+ ORDER BY 1, 2;      
+
+/*   */
+SELECT LOWER(name_subject) предмет,
+       ROUND(MIN(result))  минмум,
+       ROUND(MAX(result))  максимум,
+       ROUND(AVG(result))  среднее,
+       COUNT(enrollee_id)  количество
+  FROM subject 
+       JOIN enrollee_subject USING(subject_id)
+ GROUP BY   subject_id 
+ ORDER BY   4 DESC;   
+         
+/* Создать вспомогательную таблицу applicant,  
+   куда включить id образовательной программы, id абитуриента, сумму баллов абитуриентов (столбец itog)   */   
+CREATE TABLE applicant AS (  
+SELECT program_id, 
+       e.enrollee_id,
+       SUM(result) itog
+  FROM enrollee e
+       JOIN program_enrollee pe USING(enrollee_id)
+       JOIN program             USING(program_id)
+       JOIN program_subject     USING(program_id)
+       JOIN subject s           USING(subject_id)
+       JOIN enrollee_subject es ON s.subject_id = es.subject_id 
+                                AND es.enrollee_id = e.enrollee_id                               
+ GROUP BY name_program, 
+          name_enrollee
+ ORDER BY 1, 3 DESC   );	
+ 
+ /* Из таблицы applicant, удалить записи, если абитуриент на выбранную образовательную программу 
+    не набрал минимального балла хотя бы по одному предмету  */	  
+--    НЕПРАВИЛЬНО !!!!
+DELETE FROM applicant 
+ WHERE (program_id, enrollee_id) IN ( --  тут интересный ход с IN
+SELECT DISTINCT program_id, pe.enrollee_id
+  FROM program_enrollee pe
+       JOIN program_subject     USING(program_id)
+       JOIN subject             USING(subject_id)
+       JOIN enrollee_subject    USING(subject_id)
+ WHERE result < min_result                               
+ GROUP BY program_id, 
+       enrollee_id	 );	--    НЕПРАВИЛЬНО !!!!  
+       
+--    ПРАВИЛЬНО тут:
+DELETE FROM applicant 
+ USING applicant 
+       JOIN program_subject     USING(program_id)
+       JOIN enrollee_subject    USING(subject_id, enrollee_id)
+ WHERE result < min_result;   
+ 
+/* Повысить итоговые баллы абитуриентов в таблице applicant на значения дополнительных баллов  */ 
+
+UPDATE applicant 
+       JOIN (
+SELECT enrollee_id, 
+       IFNULL(SUM(bonus), 0) bonus 
+		 FROM enrollee_achievement
+       LEFT JOIN achievement USING (achievement_id)
+       GROUP BY enrollee_id 
+             ) t USING(enrollee_id)
+   SET itog = itog + bonus;	 
+=================================================================
+запрос DROP удаляет полностью таблицу безвозвратно, запрос DELETE удаляет необходимые нам строки либо все 
+Строки из таблицы, a запрос TRUNCATE просто очищает всю таблицу целиком.TRUNCATE также сбрасывает auto_increment.
+==================================================================
+Для изменения структуры таблицы используется оператор ALTER TABLE. С его помощью можно вставить новый столбец, удалить существующий, переименовать столбец и пр.
+
+Для вставки нового столбца используется SQL запросы:
+
+ALTER TABLE таблица ADD имя_столбца тип; - вставляет столбец после последнего
+ALTER TABLE таблица ADD имя_столбца тип FIRST; - вставляет столбец перед первым
+ALTER TABLE таблица ADD имя_столбца тип AFTER имя_столбца_1; - вставляет столбец после укзанного столбца
+Для удаления столбца используется SQL запросы:
+
+ALTER TABLE таблица DROP COLUMN имя_столбца; - удаляет столбец с заданным именем
+ALTER TABLE таблица DROP имя_столбца; - ключевое слово COLUMN не обязательно указывать
+ALTER TABLE таблица DROP имя_столбца,
+                    DROP имя_столбца_1; - удаляет два столбца
+Для переименования столбца используется  запрос (тип данных указывать обязательно):
+
+ALTER TABLE таблица CHANGE имя_столбца новое_имя_столбца ТИП ДАННЫХ;
+Для изменения типа  столбца используется запрос (два раза указывать имя столбца обязательно): 
+
+ALTER TABLE таблица CHANGE имя_столбца имя_столбца НОВЫЙ_ТИП_ДАННЫХ;
+==============================================================================================	
+/* необходимо создать новую таблицу applicant_order на основе таблицы applicant. При создании таблицы данные 
+   нужно отсортировать сначала по id образовательной программы, потом по убыванию итогового балла  */
+CREATE TABLE applicant_order AS
+SELECT program_id, 
+       enrollee_id, 
+		 itog 
+  FROM applicant
+ ORDER BY 1,3 DESC;
+SELECT * FROM applicant_order;
+  DROP TABLE applicant; 
+
+/* Занести в столбец str_id таблицы applicant_order нумерацию абитуриентов, 
+   которая начинается с 1 для каждой образовательной программы.  */ 
+ 
+====== Короткий вартант  ======
+   SET @pr = 0, @num = 1;
+UPDATE applicant_order
+   SET str_id = IF(program_id = @num_pr, @row_num := @row_num + 1, @row_num := 1 AND @num_pr := @num_pr + 1);  
+               
+SELECT * FROM applicant_order;
+
+============= Будьте аккуратны. Двоеточия можно опустить только при изначальном присваивании значения переменной. 
+   При переопределении значения переменной в запросе далее обязательно использовать "двоеточие и равно" :=
+=============
+
+/* Создать таблицу student,  в которую включить абитуриентов, 
+   которые могут быть рекомендованы к зачислению  в соответствии с планом набора.   */ 
+	 
+CREATE TABLE student AS
+SELECT name_program, name_enrollee, itog
+  FROM applicant_order
+       JOIN program USING(program_id)
+	   JOIN enrollee USING(enrollee_id)       
+ WHERE str_id <= plan
+ ORDER BY 1, 3 DESC;
+	 
